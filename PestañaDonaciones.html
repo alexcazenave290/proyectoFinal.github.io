@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Donaciones</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="PestañaDonacion.css"> 
+  <link rel="stylesheet" href="style.css">
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
+</head>
+<body>
+    <aside class="sidebar">
+  <div class="logo-menu">
+    <img src="./img/logoUpon.png" alt="Logo" class="logo">
+    <span class="menu-icon">&#9776;</span>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="index.html">Inicio</a></li>
+      <li><a href="#">Sobre Nosotros</a></li>
+      <li><a href="#">Dudas Frecuentes</a></li>
+      <li><a href="#">Asociaciones</a></li>
+    </ul>
+  </nav>
+</aside>
+
+<div class="donaciones">
+    <h1>Donaciones</h1>
+    <p>Selecciona las opciones que deseas apoyar:</p>
+
+    <label><input type="checkbox"> Donación al proyecto en general</label>
+    <label><input type="checkbox"> Donación a un refugio en específico</label>
+    <p>En caso de seleccionar un refugio específico, especificar aquí:</p>
+    <input type="text" id="input" placeholder="Refugio" style="width: 400px;" />
+
+    <p>Selecciona el método de pago:</p>
+
+    <label>
+  <input type="radio" name="metodo-pago" value="tarjeta"> Tarjeta de crédito
+  </label>
+  <label>
+  <input type="radio" name="metodo-pago" value="transferencia"> Transferencia bancaria
+  </label>
+
+    
+    <button class="btn-donar">Donar ahora</button>
+</div>
+
+</body>
+</html>
