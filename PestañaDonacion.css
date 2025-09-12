@@ -1,0 +1,52 @@
+
+    body {
+    background: #fbe0b6;
+    color: white;
+    font-family: Arial, sans-serif;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; 
+    margin: 0;
+    }
+
+
+    h1 {
+    text-align: center;
+    color: #000000;
+    }
+
+    .donaciones {
+    max-width: 900px;
+    background-color: #b48a5a;
+    padding: 20px;
+    border-radius: 10px;
+    }
+
+    label {
+    display: block;
+    margin: 15px 0;
+    }
+
+    input[type="checkbox"] {
+    margin-right: 10px;
+    }
+
+    .btn-donar {
+    background-color: #4CAF50;
+    display: block;
+    margin: 20px auto 0 auto;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    }
+
+    .btn-donar:hover {
+    background-color: #45a049;
+    }
+    
+    
+
