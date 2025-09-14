@@ -2,50 +2,146 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Donaciones</title>
+  <title>Donaciones - Casa Patitas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="PestañaDonacion.css"> 
-  <link rel="stylesheet" href="style.css">
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Tooltip base */
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
 
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 280px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 6px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%; /* encima del input */
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 0.85rem;
+    }
+
+    .tooltip .tooltiptext::after {
+      content: "";
+      position: absolute;
+      top: 100%; /* flechita abajo */
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #333 transparent transparent transparent;
+    }
+
+    /* Mostrar solo si el input está deshabilitado y el mouse está encima */
+    .tooltip input:disabled:hover + .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    /* Contenedor general */
+    .donaciones-container {
+      margin-left: 220px; /* deja espacio para la sidebar */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh; /* ocupa exactamente la altura de la pantalla */
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    /* Tarjeta blanca */
+    .donaciones-card {
+      background: #fff;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+      max-width: 600px;
+      width: 100%;
+    }
+  </style>
 </head>
 <body>
-    <aside class="sidebar">
-  <div class="logo-menu">
-    <img src="./img/logoUpon.png" alt="Logo" class="logo">
-    <span class="menu-icon">&#9776;</span>
-  </div>
-  <nav>
-    <ul>
-      <li><a href="index.html">Inicio</a></li>
-      <li><a href="#">Sobre Nosotros</a></li>
-      <li><a href="#">Dudas Frecuentes</a></li>
-      <li><a href="#">Asociaciones</a></li>
-    </ul>
-  </nav>
-</aside>
+  <aside class="sidebar">
+    <div class="logo-menu">
+      <img src="./img/logoUpon.png" alt="Logo" class="logo">
+    </div>
+    <nav>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="SobreNosotros.html">Sobre Nosotros</a></li>
+        <li><a href="#">Dudas Frecuentes</a></li>
+        <li><a href="#">Asociaciones</a></li>
+      </ul>
+    </nav>
+  </aside>
 
-<div class="donaciones">
+<div class="donaciones-container">
+  <div class="donaciones-card">
     <h1>Donaciones</h1>
     <p>Selecciona las opciones que deseas apoyar:</p>
 
-    <label><input type="checkbox"> Donación al proyecto en general</label>
-    <label><input type="checkbox"> Donación a un refugio en específico</label>
-    <p>En caso de seleccionar un refugio específico, especificar aquí:</p>
-    <input type="text" id="input" placeholder="Refugio" style="width: 400px;" />
-
-    <p>Selecciona el método de pago:</p>
-
     <label>
-  <input type="radio" name="metodo-pago" value="tarjeta"> Tarjeta de crédito
-  </label>
-  <label>
-  <input type="radio" name="metodo-pago" value="transferencia"> Transferencia bancaria
-  </label>
+      <input type="checkbox" id="general"> Donación al proyecto en general
+    </label>
+    <label>
+      <input type="checkbox" id="refugio"> Donación a un refugio en específico
+    </label>
 
+    <p>En caso de seleccionar un refugio específico, especificar aquí:</p>
+    <div class="tooltip">
+      <input type="text" id="input" placeholder="Refugio" style="width: 100%;" disabled />
+      <span class="tooltiptext">Debes elegir "Donación a un refugio en específico" para escribir aquí</span>
+    </div>
     
-    <button class="btn-donar">Donar ahora</button>
+    <br><br>
+    <button class="btn-donar" id="donarBtn">Donar ahora</button>
+  </div>
 </div>
 
+
+  <script>
+    const general = document.getElementById("general");
+    const refugio = document.getElementById("refugio");
+    const input = document.getElementById("input");
+    const donarBtn = document.getElementById("donarBtn");
+
+    // Asegurar que solo uno esté seleccionado
+    function handleCheck(e) {
+      if (e.target === general && general.checked) {
+        refugio.checked = false;
+        input.disabled = true;
+      }
+      if (e.target === refugio && refugio.checked) {
+        general.checked = false;
+        input.disabled = false;
+      }
+    }
+
+    general.addEventListener("change", handleCheck);
+    refugio.addEventListener("change", handleCheck);
+
+    // Validar que haya una opción seleccionada antes de donar
+    donarBtn.addEventListener("click", () => {
+      if (!general.checked && !refugio.checked) {
+        alert("Por favor selecciona una opción de donación.");
+        return;
+      }
+      if (refugio.checked && input.value.trim() === "") {
+        alert("Por favor escribe el nombre del refugio.");
+        return;
+      }
+      alert("¡Gracias por tu donación!");
+    });
+  </script>
 </body>
 </html>
