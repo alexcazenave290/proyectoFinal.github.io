@@ -5,153 +5,318 @@
     <title>Adopción de Mascotas</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* ===== CSS Original ===== */
+        .header {
+            width: 420px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 24px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #b48a5a;
+            border-radius: 10px;
+            padding: 12px 0;
+            min-height: 48px;
+        }
+
+        .search-bar {
+            width: 80%;
+            max-width: 320px;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            background: #fffbe6;
+            font-weight: bold;
+            text-align: center;
+            outline: none;
+            margin-left: 2%;
+            display: inline-block;
+        }
+
+        .cards-grid {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2.5rem 2rem;
+            justify-items: center;
+            margin-top: 2.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .card {
+            background: #b48a5a;
+            border-radius: 18px;
+            box-shadow: 0 2px 12px #b48a5a55;
+            width: 320px;
+            margin: 40px auto 0 auto;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: 
+                transform 0.35s cubic-bezier(.4,1.5,.6,1),
+                box-shadow 0.35s cubic-bezier(.4,1.5,.6,1);
+        }
+
+        .card:hover {
+            transform: translateY(-16px) scale(1.035) rotate(-2deg);
+            box-shadow: 0 8px 32px #b48a5a88;
+            z-index: 2;
+        }
+
+        .card-header {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            padding: 8px 14px 0 0;
+            font-size: 1.2rem;
+            color: #5a4326;
+        }
+
+        .card-img {
+            width: 220px;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin: 0 auto;
+            display: block;
+            background: #fff;
+            box-shadow: 0 2px 8px #fff8;
+        }
+
+        .card-body {
+            padding: 10px 18px 18px 18px;
+            width: 100%;
+        }
+
+        .card-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            color: #2d2d2d;
+            margin: 0 8px;
+        }
+
+        .card-user, .card-like {
+            font-size: 1.3rem;
+        }
+
+        .card-desc {
+            font-size: 0.98rem;
+            color: #222;
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        /* ===== Patitas fijas detrás de todo ===== */
+        #paw-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .paw-bg {
+            position: absolute;
+            user-select: none;
+        }
+    </style>
 </head>
 <body>
-    <div class="container-main">
-        <aside class="sidebar">
-            <div class="logo-menu">
-                <img src="./img/logoUpon.png" alt="Logo" class="logo">
-                <span class="menu-icon">&#9776;</span>
-            </div>
-            <nav>
-                <ul>
-                    <li><a href="PestañaDonaciones.html">Donaciones</a></li>
-                    <li><a href="SobreNostros.html">Sobre Nosotros</a></li>
-                    <li><a href="#">Dudas Frecuentes</a></li>
-                    <li><a href="#">Asociaciones</a></li>
-                </ul>
-            </nav>
-        </aside>
-        <main class="main-content">
-            <header class="header">
-                <input type="text" placeholder="Buscador" class="search-bar">
-                <span class="paw-icon"><i class='bx bx-paw'></i></span>
-            </header>
-<div class="background-paws">
-    <!-- Patitas de fondo -->
-    <div class="cards-grid">
-        <img src="img/pawBackground.png" class="paw-bg" style="top: 10%; left: 3%;" alt="patita">
-        <img src="img/pawBackground.png" class="paw-bg" style="top: 23%; left: 45%;" alt="patita">
-        <img src="img/pawBackground.png" class="paw-bg" style="top: 5%; right: 2%;" alt="patita">
-        <img src="img/pawBackground.png" class="paw-bg" style="top: 40%; left: 2%;" alt="patita">
-        <img src="img/pawBackground.png" class="paw-bg" style="top: 60%; left: 42%;" alt="patita">
-        <img src="img/pawBackground.png" class="paw-bg" style="top: 75%; right: 4%;" alt="patita">
-        <img src="img/pawBackground.png" class="paw-bg" style="bottom: 8%; left: 3%;" alt="patita">
-        <img src="img/pawBackground.png" class="paw-bg" style="top:70%; left: 54%;" alt="patita">
-        <img src="img/pawBackground.png" class="paw-bg" style="bottom: 6%; right: 1%;" alt="patita">
-        <!-- Tarjeta 1 -->
+<div class="container-main">
+    <aside class="sidebar">
+        <div class="logo-menu">
+            <img src="./img/logoUpon.png" alt="Logo" class="logo">
+            <span class="menu-icon">&#9776;</span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="PestañaDonaciones.html">Donaciones</a></li>
+                <li><a href="SobreNosotros.html">Sobre Nosotros</a></li>
+                <li><a href="#">Dudas Frecuentes</a></li>
+                <li><a href="#">Asociaciones</a></li>
+            </ul>
+        </nav>
+    </aside>
 
-        <div class="card">
-            <div class="card-header">
-            <span class="card-dot">...</span>
-            </div>
-            <img src="./img/pet1.jpeg" alt="Max" class="card-img">
-            <div class="card-body">
-            <div class="card-info">
-                <span class="card-user"><i class='bx bx-user'></i></span>
-                <span class="card-title">Max</span>
-                <span class="card-like"><i class='bx bx-like'></i></span>
-            </div>
-            <div class="card-desc">
-                Soy Max, un perro leal y cariñoso, ¡busco una familia para dar todo mi amor!
-            </div>
-            </div>
-        </div>
-        <!-- Tarjeta 2 -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-dot">...</span>
-            </div>
-            <img src="./img/pet2.webp" alt="Luna" class="card-img">
-            <div class="card-body">
-                <div class="card-info">
-                    <span class="card-user"><i class='bx bx-user'></i></span>
-                    <span class="card-title">Luna</span>
-                    <span class="card-like"><i class='bx bx-like'></i></span>
+    <main class="main-content">
+        <header class="header">
+            <input type="text" placeholder="Buscador" class="search-bar">
+            <span class="paw-icon"><i class='bx bx-paw'></i></span>
+        </header>
+
+        <div class="background-paws">
+            <div class="cards-grid">
+                <!-- 6 Cards originales -->
+                <div class="card">
+                    <div class="card-header"><span class="card-dot">...</span></div>
+                    <img src="./img/pet1.jpeg" alt="Max" class="card-img">
+                    <div class="card-body">
+                        <div class="card-info">
+                            <span class="card-user"><i class='bx bx-user'></i></span>
+                            <span class="card-title">Max</span>
+                            <span class="card-like"><i class='bx bx-like'></i></span>
+                        </div>
+                        <div class="card-desc">Soy Max, un perro leal y cariñoso, ¡busco una familia!</div>
+                    </div>
                 </div>
-                <div class="card-desc">
-                    Soy Luna, una perra curiosa y juguetona, lista para un nuevo hogar.
+
+                <div class="card">
+                    <div class="card-header"><span class="card-dot">...</span></div>
+                    <img src="./img/pet2.webp" alt="Luna" class="card-img">
+                    <div class="card-body">
+                        <div class="card-info">
+                            <span class="card-user"><i class='bx bx-user'></i></span>
+                            <span class="card-title">Luna</span>
+                            <span class="card-like"><i class='bx bx-like'></i></span>
+                        </div>
+                        <div class="card-desc">Soy Luna, una perra curiosa y juguetona, lista para un nuevo hogar.</div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <!-- Tarjeta 3 -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-dot">...</span>
-            </div>
-            <img src="./img/pet3.avif" alt="Rocky" class="card-img">
-            <div class="card-body">
-                <div class="card-info">
-                    <span class="card-user"><i class='bx bx-user'></i></span>
-                    <span class="card-title">Rocky</span>
-                    <span class="card-like"><i class='bx bx-like'></i></span>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-dot">...</span></div>
+                    <img src="./img/pet3.avif" alt="Rocky" class="card-img">
+                    <div class="card-body">
+                        <div class="card-info">
+                            <span class="card-user"><i class='bx bx-user'></i></span>
+                            <span class="card-title">Rocky</span>
+                            <span class="card-like"><i class='bx bx-like'></i></span>
+                        </div>
+                        <div class="card-desc">Soy Rocky, un perro activo y protector, ideal para familias con niños.</div>
+                    </div>
                 </div>
-                <div class="card-desc">
-                    Soy Rocky, un perro activo y protector, ideal para familias con niños.
+
+                <div class="card">
+                    <div class="card-header"><span class="card-dot">...</span></div>
+                    <img src="./img/pet4.jpg" alt="Mia" class="card-img">
+                    <div class="card-body">
+                        <div class="card-info">
+                            <span class="card-user"><i class='bx bx-user'></i></span>
+                            <span class="card-title">Mia</span>
+                            <span class="card-like"><i class='bx bx-like'></i></span>
+                        </div>
+                        <div class="card-desc">Soy Mia, una gata elegante y tranquila, perfecta para la compañía en casa.</div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <!-- Tarjeta 4 -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-dot">...</span>
-            </div>
-            <img src="./img/pet4.jpg" alt="Mia" class="card-img">
-            <div class="card-body">
-                <div class="card-info">
-                    <span class="card-user"><i class='bx bx-user'></i></span>
-                    <span class="card-title">Mia</span>
-                    <span class="card-like"><i class='bx bx-like'></i></span>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-dot">...</span></div>
+                    <img src="./img/pet5.jpg" alt="Toby" class="card-img">
+                    <div class="card-body">
+                        <div class="card-info">
+                            <span class="card-user"><i class='bx bx-user'></i></span>
+                            <span class="card-title">Toby</span>
+                            <span class="card-like"><i class='bx bx-like'></i></span>
+                        </div>
+                        <div class="card-desc">Soy Toby, un gatito simpático y juguetón, ¡adóptame y seamos amigos!</div>
+                    </div>
                 </div>
-                <div class="card-desc">
-                    Soy Mia, una gata elegante y tranquila, perfecta para la compañía en casa.
-                </div>
-            </div>
-        </div>
-        <!-- Tarjeta 5 -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-dot">...</span>
-            </div>
-            <img src="./img/pet5.jpg" alt="Toby" class="card-img">
-            <div class="card-body">
-                <div class="card-info">
-                    <span class="card-user"><i class='bx bx-user'></i></span>
-                    <span class="card-title">Toby</span>
-                    <span class="card-like"><i class='bx bx-like'></i></span>
-                </div>
-                <div class="card-desc">
-                    Soy Toby, un gatito simpático y juguetón, ¡adóptame y seamos amigos!
-                </div>
-            </div>
-        </div>
-        <!-- Tarjeta 6 -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-dot">...</span>
-            </div>
-            <img src="./img/pet6.jpeg" alt="Nina" class="card-img">
-            <div class="card-body">
-                <div class="card-info">
-                    <span class="card-user"><i class='bx bx-user'></i></span>
-                    <span class="card-title">Nina</span>
-                    <span class="card-like"><i class='bx bx-like'></i></span>
-                </div>
-                <div class="card-desc">
-                    Soy Nina, una gatita dulce y cariñosa, esperando un hogar lleno de amor.
+
+                <div class="card">
+                    <div class="card-header"><span class="card-dot">...</span></div>
+                    <img src="./img/pet6.jpeg" alt="Nina" class="card-img">
+                    <div class="card-body">
+                        <div class="card-info">
+                            <span class="card-user"><i class='bx bx-user'></i></span>
+                            <span class="card-title">Nina</span>
+                            <span class="card-like"><i class='bx bx-like'></i></span>
+                        </div>
+                        <div class="card-desc">Soy Nina, una gatita dulce y cariñosa, esperando un hogar lleno de amor.</div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 </div>
-        </main>
-    </div>
 
-    <script src="script.js"></script>
+<!-- Contenedor de patitas -->
+<div id="paw-container"></div>
+
+<script>
+    // ===== Configuración fácil =====
+    const cantidadPatitas = 15;
+    const tiempoMin = 500;
+    const tiempoMax = 1200;
+    const tamanoMin = 30;
+    const tamanoMax = 70;
+    const sidebarWidth = 200; 
+    const headerHeight = 90; // aproximado, ajusta si cambia
+    // ================================
+
+    document.addEventListener('DOMContentLoaded', function() {
+        generarPatitas();
+    });
+
+    function generarPatitas() {
+        const container = document.getElementById('paw-container');
+        const containerWidth = window.innerWidth - sidebarWidth;
+        const containerHeight = window.innerHeight;
+
+        const posiciones = [];
+
+        for(let i=0; i<cantidadPatitas; i++) {
+            const paw = document.createElement('img');
+            paw.src = 'img/pawBackground.png';
+            paw.classList.add('paw-bg');
+
+            const tamano = tamanoMin + Math.random() * (tamanoMax - tamanoMin);
+            paw.style.width = `${tamano}px`;
+            paw.style.height = `${tamano}px`;
+
+            let x, y, intentos = 0;
+            do {
+                x = sidebarWidth + Math.random() * (containerWidth - tamano);
+                y = headerHeight + Math.random() * (containerHeight - headerHeight - tamano);
+                intentos++;
+            } while(posiciones.some(p => 
+                Math.abs(p.x - x) < (p.size + tamano) && Math.abs(p.y - y) < (p.size + tamano)
+            ) && intentos < 100);
+
+            posiciones.push({x, y, size: tamano});
+            paw.style.left = `${x}px`;
+            paw.style.top = `${y}px`;
+
+            container.appendChild(paw);
+            animarPatita(paw);
+        }
+    }
+
+    function animarPatita(paw) {
+        const randomDeg = Math.floor(Math.random() * 91) - 45;
+        paw.style.transform = `rotate(${randomDeg}deg)`;
+
+        const nextTime = tiempoMin + Math.random() * (tiempoMax - tiempoMin);
+        setTimeout(() => animarPatita(paw), nextTime);
+    }
+
+    window.addEventListener('resize', () => {
+        const paws = document.querySelectorAll('.paw-bg');
+        const containerWidth = window.innerWidth - sidebarWidth;
+        const containerHeight = window.innerHeight;
+        paws.forEach(paw => {
+            const tamano = paw.offsetWidth;
+            paw.style.left = sidebarWidth + Math.random() * (containerWidth - tamano) + 'px';
+            paw.style.top = headerHeight + Math.random() * (containerHeight - headerHeight - tamano) + 'px';
+        });
+    });
+</script>
+
 </body>
-
 </html>
-
-
-
-
