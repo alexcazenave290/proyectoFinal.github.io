@@ -136,6 +136,37 @@
             position: absolute;
             user-select: none;
         }
+
+        /* ===== Estilos para animaciones de búsqueda ===== */
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(10px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        .search-bar::placeholder {
+            color: #b48a5a;
+            opacity: 0.7;
+        }
+
+        .search-bar:focus::placeholder {
+            opacity: 0.4;
+        }
+
+        /* Mensaje de no resultados */
+        #no-results-message {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: #b48a5a;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -157,12 +188,12 @@
 
     <main class="main-content">
         <header class="header">
-            <input type="text" placeholder="Buscador" class="search-bar">
+            <input type="text" placeholder="Buscar mascota..." class="search-bar" id="searchBar">
             <span class="paw-icon"><i class='bx bx-paw'></i></span>
         </header>
 
         <div class="background-paws">
-            <div class="cards-grid">
+            <div class="cards-grid" id="cards-grid">
                 <!-- 6 Cards originales -->
                 <div class="card">
                     <div class="card-header"><span class="card-dot">...</span></div>
@@ -262,6 +293,7 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         generarPatitas();
+        inicializarBuscador();
     });
 
     function generarPatitas() {
@@ -316,6 +348,66 @@
             paw.style.top = headerHeight + Math.random() * (containerHeight - headerHeight - tamano) + 'px';
         });
     });
+
+    // ===== Funciones para el buscador =====
+    function inicializarBuscador() {
+        const searchBar = document.getElementById('searchBar');
+        
+        searchBar.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            filtrarMascotas(searchTerm);
+        });
+
+        // También funciona cuando se borra el contenido
+        searchBar.addEventListener('keyup', function(e) {
+            if (e.key === 'Backspace' || e.key === 'Delete') {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                filtrarMascotas(searchTerm);
+            }
+        });
+    }
+
+    function filtrarMascotas(searchTerm) {
+        const cards = document.querySelectorAll('.card');
+        let mascotasVisibles = 0;
+        
+        cards.forEach(card => {
+            const nombre = card.querySelector('.card-title').textContent.toLowerCase();
+            const descripcion = card.querySelector('.card-desc').textContent.toLowerCase();
+            
+            // Buscar en nombre y descripción
+            const coincide = nombre.includes(searchTerm) || descripcion.includes(searchTerm);
+            
+            if (coincide || searchTerm === '') {
+                card.style.display = 'flex';
+                card.style.animation = 'fadeIn 0.3s ease-in';
+                mascotasVisibles++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // Mostrar mensaje si no hay resultados
+        mostrarMensajeNoResultados(mascotasVisibles === 0 && searchTerm !== '');
+    }
+
+    function mostrarMensajeNoResultados(mostrar) {
+        let mensaje = document.getElementById('no-results-message');
+        
+        if (mostrar && !mensaje) {
+            // Crear mensaje de no resultados
+            mensaje = document.createElement('div');
+            mensaje.id = 'no-results-message';
+            mensaje.innerHTML = `
+                <i class='bx bx-search-alt' style='font-size: 3rem; display: block; margin-bottom: 20px; opacity: 0.5;'></i>
+                No se encontraron mascotas que coincidan con tu búsqueda
+            `;
+            document.getElementById('cards-grid').appendChild(mensaje);
+        } else if (!mostrar && mensaje) {
+            // Eliminar mensaje si ya no es necesario
+            mensaje.remove();
+        }
+    }
 </script>
 
 </body>
