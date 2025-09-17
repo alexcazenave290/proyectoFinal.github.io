@@ -6,13 +6,10 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* ===== CSS Original ===== */
+        /* ===== Encabezado ===== */
         .header {
             width: 420px;
-            margin-left: auto;
-            margin-right: auto;
-            margin-top: 24px;
-            margin-bottom: 18px;
+            margin: 24px auto 18px auto;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -34,9 +31,9 @@
             text-align: center;
             outline: none;
             margin-left: 2%;
-            display: inline-block;
         }
 
+        /* ===== Cards ===== */
         .cards-grid {
             position: relative;
             z-index: 1;
@@ -44,8 +41,7 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 2.5rem 2rem;
             justify-items: center;
-            margin-top: 2.5rem;
-            margin-bottom: 2.5rem;
+            margin: 2.5rem 0;
         }
 
         .card {
@@ -84,7 +80,7 @@
             height: 220px;
             object-fit: cover;
             border-radius: 12px;
-            margin: 0 auto;
+            margin: 12px auto;
             display: block;
             background: #fff;
             box-shadow: 0 2px 8px #fff8;
@@ -93,6 +89,7 @@
         .card-body {
             padding: 10px 18px 18px 18px;
             width: 100%;
+            text-align: center;
         }
 
         .card-info {
@@ -105,9 +102,10 @@
         }
 
         .card-title {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             color: #2d2d2d;
-            margin: 0 8px;
+            margin: 8px 0;
+            font-weight: bold;
         }
 
         .card-user, .card-like {
@@ -115,13 +113,40 @@
         }
 
         .card-desc {
-            font-size: 0.98rem;
+            font-size: 0.95rem;
             color: #222;
             margin-top: 6px;
-            text-align: center;
         }
 
-        /* ===== Patitas fijas detrás de todo ===== */
+        .card-details {
+            display: none;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            text-align: left;
+            background: #fffbe6;
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        .card:hover .card-details {
+            display: block;
+        }
+
+        /* ===== Mensaje cuando no hay mascotas ===== */
+        .no-pets-message {
+            text-align: center;
+            color: #666;
+            font-size: 1.2rem;
+            margin: 50px 0;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* ===== Patitas animadas detrás ===== */
         #paw-container {
             position: fixed;
             top: 0;
@@ -129,43 +154,19 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 0;
+            z-index: -1;
         }
 
         .paw-bg {
             position: absolute;
             user-select: none;
+            animation: flotar 3s ease-in-out infinite;
         }
 
-        /* ===== Estilos para animaciones de búsqueda ===== */
-        @keyframes fadeIn {
-            from { 
-                opacity: 0; 
-                transform: translateY(10px); 
-            }
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
-            }
-        }
-
-        .search-bar::placeholder {
-            color: #b48a5a;
-            opacity: 0.7;
-        }
-
-        .search-bar:focus::placeholder {
-            opacity: 0.4;
-        }
-
-        /* Mensaje de no resultados */
-        #no-results-message {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 40px;
-            color: #b48a5a;
-            font-size: 1.2rem;
-            font-weight: bold;
+        @keyframes flotar {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+            50% { transform: translateY(-10px) rotate(10deg); opacity: 1; }
+            100% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
         }
     </style>
 </head>
@@ -188,90 +189,13 @@
 
     <main class="main-content">
         <header class="header">
-            <input type="text" placeholder="Buscar mascota..." class="search-bar" id="searchBar">
+            <input type="text" placeholder="Buscador" class="search-bar" id="searchBar">
             <span class="paw-icon"><i class='bx bx-paw'></i></span>
         </header>
 
         <div class="background-paws">
-            <div class="cards-grid" id="cards-grid">
-                <!-- 6 Cards originales -->
-                <div class="card">
-                    <div class="card-header"><span class="card-dot">...</span></div>
-                    <img src="./img/pet1.jpeg" alt="Max" class="card-img">
-                    <div class="card-body">
-                        <div class="card-info">
-                            <span class="card-user"><i class='bx bx-user'></i></span>
-                            <span class="card-title">Max</span>
-                            <span class="card-like"><i class='bx bx-like'></i></span>
-                        </div>
-                        <div class="card-desc">Soy Max, un perro leal y cariñoso, ¡busco una familia!</div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header"><span class="card-dot">...</span></div>
-                    <img src="./img/pet2.webp" alt="Luna" class="card-img">
-                    <div class="card-body">
-                        <div class="card-info">
-                            <span class="card-user"><i class='bx bx-user'></i></span>
-                            <span class="card-title">Luna</span>
-                            <span class="card-like"><i class='bx bx-like'></i></span>
-                        </div>
-                        <div class="card-desc">Soy Luna, una perra curiosa y juguetona, lista para un nuevo hogar.</div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header"><span class="card-dot">...</span></div>
-                    <img src="./img/pet3.avif" alt="Rocky" class="card-img">
-                    <div class="card-body">
-                        <div class="card-info">
-                            <span class="card-user"><i class='bx bx-user'></i></span>
-                            <span class="card-title">Rocky</span>
-                            <span class="card-like"><i class='bx bx-like'></i></span>
-                        </div>
-                        <div class="card-desc">Soy Rocky, un perro activo y protector, ideal para familias con niños.</div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header"><span class="card-dot">...</span></div>
-                    <img src="./img/pet4.jpg" alt="Mia" class="card-img">
-                    <div class="card-body">
-                        <div class="card-info">
-                            <span class="card-user"><i class='bx bx-user'></i></span>
-                            <span class="card-title">Mia</span>
-                            <span class="card-like"><i class='bx bx-like'></i></span>
-                        </div>
-                        <div class="card-desc">Soy Mia, una gata elegante y tranquila, perfecta para la compañía en casa.</div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header"><span class="card-dot">...</span></div>
-                    <img src="./img/pet5.jpg" alt="Toby" class="card-img">
-                    <div class="card-body">
-                        <div class="card-info">
-                            <span class="card-user"><i class='bx bx-user'></i></span>
-                            <span class="card-title">Toby</span>
-                            <span class="card-like"><i class='bx bx-like'></i></span>
-                        </div>
-                        <div class="card-desc">Soy Toby, un gatito simpático y juguetón, ¡adóptame y seamos amigos!</div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header"><span class="card-dot">...</span></div>
-                    <img src="./img/pet6.jpeg" alt="Nina" class="card-img">
-                    <div class="card-body">
-                        <div class="card-info">
-                            <span class="card-user"><i class='bx bx-user'></i></span>
-                            <span class="card-title">Nina</span>
-                            <span class="card-like"><i class='bx bx-like'></i></span>
-                        </div>
-                        <div class="card-desc">Soy Nina, una gatita dulce y cariñosa, esperando un hogar lleno de amor.</div>
-                    </div>
-                </div>
+            <div class="cards-grid" id="cardsGrid">
+                <!-- Las tarjetas se cargarán aquí automáticamente -->
             </div>
         </div>
     </main>
@@ -281,26 +205,114 @@
 <div id="paw-container"></div>
 
 <script>
-    // ===== Configuración fácil =====
+    const cardsGrid = document.getElementById('cardsGrid');
+    const searchBar = document.getElementById('searchBar');
+    
+    // ===== Configuración =====
     const cantidadPatitas = 15;
-    const tiempoMin = 500;
-    const tiempoMax = 1200;
     const tamanoMin = 30;
     const tamanoMax = 70;
     const sidebarWidth = 200; 
-    const headerHeight = 90; // aproximado, ajusta si cambia
-    // ================================
+    const headerHeight = 90;
 
-    document.addEventListener('DOMContentLoaded', function() {
+    // ===== Cargar mascotas desde localStorage =====
+    document.addEventListener('DOMContentLoaded', () => {
+        cargarMascotas();
         generarPatitas();
-        inicializarBuscador();
+        
+        // Funcionalidad de búsqueda
+        searchBar.addEventListener('input', filtrarMascotas);
     });
+
+    function cargarMascotas() {
+        // Obtener mascotas del localStorage (mismo que el primer archivo)
+        const pets = JSON.parse(localStorage.getItem("pets")) || [];
+        
+        if (pets.length === 0) {
+            mostrarMensajeVacio();
+        } else {
+            pets.forEach(pet => crearCard(pet));
+        }
+    }
+
+    function crearCard(pet) {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+            <div class="card-header">
+                <i class='bx bx-heart card-like'></i>
+            </div>
+            <img src="${pet.image}" class="card-img" alt="${pet.name}">
+            <div class="card-body">
+                <div class="card-info">
+                    <i class='bx bx-user card-user'></i>
+                    <div class="card-title">${pet.name}</div>
+                    <i class='bx bx-paw'></i>
+                </div>
+                <div class="card-desc">${pet.desc}</div>
+                <div class="card-details">
+                    <p><b>Raza:</b> ${pet.raza}</p>
+                    <p><b>Especie:</b> ${pet.especie}</p>
+                    <p><b>Tamaño:</b> ${pet.tamano}</p>
+                    <p><b>Salud:</b> ${pet.salud}</p>
+                </div>
+            </div>`;
+        cardsGrid.appendChild(card);
+    }
+
+    function mostrarMensajeVacio() {
+        const mensaje = document.createElement("div");
+        mensaje.className = "no-pets-message";
+        mensaje.innerHTML = `
+            <i class='bx bx-sad' style='font-size: 3rem; color: #b48a5a; display: block; margin-bottom: 10px;'></i>
+            <h3>No hay mascotas disponibles</h3>
+            <p>Ve al formulario de adopción para agregar algunas mascotas.</p>
+        `;
+        cardsGrid.appendChild(mensaje);
+    }
+
+    function filtrarMascotas() {
+        const filtro = searchBar.value.toLowerCase();
+        const pets = JSON.parse(localStorage.getItem("pets")) || [];
+        
+        // Limpiar grid
+        cardsGrid.innerHTML = '';
+        
+        if (filtro === '') {
+            // Si no hay filtro, mostrar todas
+            if (pets.length === 0) {
+                mostrarMensajeVacio();
+            } else {
+                pets.forEach(pet => crearCard(pet));
+            }
+        } else {
+            // Filtrar mascotas
+            const petsFiltradas = pets.filter(pet => 
+                pet.name.toLowerCase().includes(filtro) ||
+                pet.raza.toLowerCase().includes(filtro) ||
+                pet.especie.toLowerCase().includes(filtro) ||
+                pet.desc.toLowerCase().includes(filtro)
+            );
+            
+            if (petsFiltradas.length === 0) {
+                const mensaje = document.createElement("div");
+                mensaje.className = "no-pets-message";
+                mensaje.innerHTML = `
+                    <i class='bx bx-search' style='font-size: 3rem; color: #b48a5a; display: block; margin-bottom: 10px;'></i>
+                    <h3>No se encontraron mascotas</h3>
+                    <p>No hay mascotas que coincidan con "${filtro}"</p>
+                `;
+                cardsGrid.appendChild(mensaje);
+            } else {
+                petsFiltradas.forEach(pet => crearCard(pet));
+            }
+        }
+    }
 
     function generarPatitas() {
         const container = document.getElementById('paw-container');
         const containerWidth = window.innerWidth - sidebarWidth;
         const containerHeight = window.innerHeight;
-
         const posiciones = [];
 
         for(let i=0; i<cantidadPatitas; i++) {
@@ -325,89 +337,19 @@
             paw.style.left = `${x}px`;
             paw.style.top = `${y}px`;
 
+            paw.style.animationDuration = `${2 + Math.random()*3}s`;
+
             container.appendChild(paw);
-            animarPatita(paw);
         }
     }
 
-    function animarPatita(paw) {
-        const randomDeg = Math.floor(Math.random() * 91) - 45;
-        paw.style.transform = `rotate(${randomDeg}deg)`;
-
-        const nextTime = tiempoMin + Math.random() * (tiempoMax - tiempoMin);
-        setTimeout(() => animarPatita(paw), nextTime);
-    }
-
-    window.addEventListener('resize', () => {
-        const paws = document.querySelectorAll('.paw-bg');
-        const containerWidth = window.innerWidth - sidebarWidth;
-        const containerHeight = window.innerHeight;
-        paws.forEach(paw => {
-            const tamano = paw.offsetWidth;
-            paw.style.left = sidebarWidth + Math.random() * (containerWidth - tamano) + 'px';
-            paw.style.top = headerHeight + Math.random() * (containerHeight - headerHeight - tamano) + 'px';
-        });
+    // ===== Actualizar automáticamente cuando cambie el localStorage =====
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'pets') {
+            cardsGrid.innerHTML = '';
+            cargarMascotas();
+        }
     });
-
-    // ===== Funciones para el buscador =====
-    function inicializarBuscador() {
-        const searchBar = document.getElementById('searchBar');
-        
-        searchBar.addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase().trim();
-            filtrarMascotas(searchTerm);
-        });
-
-        // También funciona cuando se borra el contenido
-        searchBar.addEventListener('keyup', function(e) {
-            if (e.key === 'Backspace' || e.key === 'Delete') {
-                const searchTerm = e.target.value.toLowerCase().trim();
-                filtrarMascotas(searchTerm);
-            }
-        });
-    }
-
-    function filtrarMascotas(searchTerm) {
-        const cards = document.querySelectorAll('.card');
-        let mascotasVisibles = 0;
-        
-        cards.forEach(card => {
-            const nombre = card.querySelector('.card-title').textContent.toLowerCase();
-            const descripcion = card.querySelector('.card-desc').textContent.toLowerCase();
-            
-            // Buscar en nombre y descripción
-            const coincide = nombre.includes(searchTerm) || descripcion.includes(searchTerm);
-            
-            if (coincide || searchTerm === '') {
-                card.style.display = 'flex';
-                card.style.animation = 'fadeIn 0.3s ease-in';
-                mascotasVisibles++;
-            } else {
-                card.style.display = 'none';
-            }
-        });
-
-        // Mostrar mensaje si no hay resultados
-        mostrarMensajeNoResultados(mascotasVisibles === 0 && searchTerm !== '');
-    }
-
-    function mostrarMensajeNoResultados(mostrar) {
-        let mensaje = document.getElementById('no-results-message');
-        
-        if (mostrar && !mensaje) {
-            // Crear mensaje de no resultados
-            mensaje = document.createElement('div');
-            mensaje.id = 'no-results-message';
-            mensaje.innerHTML = `
-                <i class='bx bx-search-alt' style='font-size: 3rem; display: block; margin-bottom: 20px; opacity: 0.5;'></i>
-                No se encontraron mascotas que coincidan con tu búsqueda
-            `;
-            document.getElementById('cards-grid').appendChild(mensaje);
-        } else if (!mostrar && mensaje) {
-            // Eliminar mensaje si ya no es necesario
-            mensaje.remove();
-        }
-    }
 </script>
 
 </body>
