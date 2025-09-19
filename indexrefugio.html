@@ -144,6 +144,21 @@
             display: block;
         }
 
+        .card-delete {
+          cursor: pointer;
+          color: #e63946; /* rojo para eliminar */
+          font-size: 1.3rem;
+          margin-right: auto;
+          margin-left: 15px; /* lo pone a la izquierda */
+          transition: transform 0.2s ease;
+        }
+
+        .card-delete:hover {
+          transform: scale(1.2);
+          color: #ff0000;
+        }
+
+
     /* ===== Botón flotante ===== */
     .add-pet-btn {
       position: fixed;       /* se queda fijo al hacer scroll */
@@ -362,51 +377,77 @@
     if(file) reader.readAsDataURL(file);
   };
 
-  function crearCard(pet) {
+function crearCard(pet) {
     cardCounter++;
     const cardId = `card-${cardCounter}`;
     const card = document.createElement("div");
     card.className = "card";
     card.id = cardId;
 
+    // Revisar si la mascota estaba marcada como "like"
     const likedPets = JSON.parse(localStorage.getItem("likedPets")) || {};
     const isLiked = likedPets[cardId] === true;
 
     card.innerHTML = `
-      <div class="card-header">
-        <i class='bx bx-message-detail'></i>
-        <i class='bx ${isLiked ? "bxs-heart liked" : "bx-heart"} card-like'></i>
-      </div>
-      <img src="${pet.image}" class="card-img" alt="${pet.name}">
-      <div class="card-body">
-        <div class="card-info">
-          <i class='bx bxs-cat'></i> 
-          <div class="card-title">${pet.name}</div>
-          <i class='bx bxs-dog'></i> 
+        <div class="card-header">
+            <i class='bx bx-trash card-delete' title="Eliminar mascota"></i>
+            <span class="card-id">ID: ${cardId}</span>
+            <i class='bx bx-message-detail'></i>
+            <i class='bx ${isLiked ? "bxs-heart liked" : "bx-heart"} card-like'></i>
         </div>
-        <div class="card-desc">${pet.desc}</div>
-        <div class="card-details">
-          <p><b>Raza:</b> ${pet.raza}</p>
-          <p><b>Especie:</b> ${pet.especie}</p>
-          <p><b>Tamaño:</b> ${pet.tamano}</p>
-          <p><b>Salud:</b> ${pet.salud}</p>
+        <img src="${pet.image}" class="card-img" alt="${pet.name}">
+        <div class="card-body">
+            <div class="card-info">
+                <i class='bx bxs-cat'></i> 
+                <div class="card-title">${pet.name}</div>
+                <i class='bx bxs-dog'></i> 
+            </div>
+            <div class="card-desc">${pet.desc}</div>
+            <div class="card-details">
+                <p><b>Raza:</b> ${pet.raza}</p>
+                <p><b>Especie:</b> ${pet.especie}</p>
+                <p><b>Tamaño:</b> ${pet.tamano}</p>
+                <p><b>Salud:</b> ${pet.salud}</p>
+            </div>
         </div>
-      </div>
     `;
 
+    // Evento para el "like"
     const heartIcon = card.querySelector(".card-like");
     heartIcon.addEventListener("click", () => {
-      heartIcon.classList.toggle("bx-heart");
-      heartIcon.classList.toggle("bxs-heart");
-      heartIcon.classList.toggle("liked");
+        heartIcon.classList.toggle("bx-heart");
+        heartIcon.classList.toggle("bxs-heart");
+        heartIcon.classList.toggle("liked");
 
-      const likedPets = JSON.parse(localStorage.getItem("likedPets")) || {};
-      likedPets[cardId] = heartIcon.classList.contains("bxs-heart");
-      localStorage.setItem("likedPets", JSON.stringify(likedPets));
+        const likedPets = JSON.parse(localStorage.getItem("likedPets")) || {};
+        likedPets[cardId] = heartIcon.classList.contains("bxs-heart");
+        localStorage.setItem("likedPets", JSON.stringify(likedPets));
+    });
+
+    // Evento para eliminar la tarjeta
+    const deleteIcon = card.querySelector(".card-delete");
+    deleteIcon.addEventListener("click", () => {
+        // Eliminar del localStorage
+        let pets = JSON.parse(localStorage.getItem("pets")) || [];
+        const index = Array.from(cardsGrid.children).indexOf(card);
+        pets.splice(index, 1);
+        localStorage.setItem("pets", JSON.stringify(pets));
+
+        // Eliminar de likedPets
+        let likedPets = JSON.parse(localStorage.getItem("likedPets")) || {};
+        delete likedPets[cardId];
+        localStorage.setItem("likedPets", JSON.stringify(likedPets));
+
+        // Eliminar del DOM
+        card.remove();
+
+        // Mostrar mensaje si no quedan mascotas
+        if (pets.length === 0) mostrarMensajeVacio();
     });
 
     cardsGrid.appendChild(card);
-  }
+}
+
 
     function mostrarMensajeVacio() {
         const mensaje = document.createElement("div");
