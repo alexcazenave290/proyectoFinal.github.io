@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Adopción de Mascotas</title>
+    <title>Casa Patitas</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="style.css">
     <style>
@@ -108,8 +108,20 @@
             font-weight: bold;
         }
 
-        .card-user, .card-like {
+        .card-user{
             font-size: 1.3rem;
+        }
+
+        .card-like {
+            cursor: pointer;
+            transition: transform 0.3s ease, color 0.3s ease;
+            color: #5a4326;
+            font-size: 1.3rem;
+        }
+
+        .card-like.liked {
+            color: #e63946; /* rojo encendido */
+            transform: scale(1.2);
         }
 
         .card-desc {
@@ -215,17 +227,15 @@
     const sidebarWidth = 200; 
     const headerHeight = 90;
 
-    // ===== Cargar mascotas desde localStorage =====
+    let cardCounter = 0; // 🔹 contador global para IDs
+
     document.addEventListener('DOMContentLoaded', () => {
         cargarMascotas();
         generarPatitas();
-        
-        // Funcionalidad de búsqueda
         searchBar.addEventListener('input', filtrarMascotas);
     });
 
     function cargarMascotas() {
-        // Obtener mascotas del localStorage (mismo que el primer archivo)
         const pets = JSON.parse(localStorage.getItem("pets")) || [];
         
         if (pets.length === 0) {
@@ -236,18 +246,28 @@
     }
 
     function crearCard(pet) {
+        cardCounter++; // 🔹 incrementa ID único
+        const cardId = `card-${cardCounter}`;
+
         const card = document.createElement("div");
         card.className = "card";
+        card.id = cardId;
+
+        // Revisar si esta tarjeta ya estaba likeada
+        const likedPets = JSON.parse(localStorage.getItem("likedPets")) || {};
+        const isLiked = likedPets[cardId] === true;
+
         card.innerHTML = `
             <div class="card-header">
-                <i class='bx bx-heart card-like'></i>
+                <i class='bx bx-message-detail'></i>
+                <i class='bx ${isLiked ? "bxs-heart liked" : "bx-heart"} card-like'></i>
             </div>
             <img src="${pet.image}" class="card-img" alt="${pet.name}">
             <div class="card-body">
                 <div class="card-info">
-                    <i class='bx bx-user card-user'></i>
+                    <i class='bx bxs-cat'></i> 
                     <div class="card-title">${pet.name}</div>
-                    <i class='bx bx-paw'></i>
+                    <i class='bx bxs-dog'></i> 
                 </div>
                 <div class="card-desc">${pet.desc}</div>
                 <div class="card-details">
@@ -257,6 +277,20 @@
                     <p><b>Salud:</b> ${pet.salud}</p>
                 </div>
             </div>`;
+
+        // === Evento click en el corazón ===
+        const heartIcon = card.querySelector(".card-like");
+        heartIcon.addEventListener("click", () => {
+            heartIcon.classList.toggle("bx-heart");
+            heartIcon.classList.toggle("bxs-heart");
+            heartIcon.classList.toggle("liked");
+
+            // Guardar estado en localStorage usando el ID único
+            const likedPets = JSON.parse(localStorage.getItem("likedPets")) || {};
+            likedPets[cardId] = heartIcon.classList.contains("bxs-heart");
+            localStorage.setItem("likedPets", JSON.stringify(likedPets));
+        });
+
         cardsGrid.appendChild(card);
     }
 
@@ -275,18 +309,16 @@
         const filtro = searchBar.value.toLowerCase();
         const pets = JSON.parse(localStorage.getItem("pets")) || [];
         
-        // Limpiar grid
         cardsGrid.innerHTML = '';
-        
+        cardCounter = 0; // 🔹 resetear contador al filtrar
+
         if (filtro === '') {
-            // Si no hay filtro, mostrar todas
             if (pets.length === 0) {
                 mostrarMensajeVacio();
             } else {
                 pets.forEach(pet => crearCard(pet));
             }
         } else {
-            // Filtrar mascotas
             const petsFiltradas = pets.filter(pet => 
                 pet.name.toLowerCase().includes(filtro) ||
                 pet.raza.toLowerCase().includes(filtro) ||
@@ -343,10 +375,10 @@
         }
     }
 
-    // ===== Actualizar automáticamente cuando cambie el localStorage =====
     window.addEventListener('storage', function(e) {
         if (e.key === 'pets') {
             cardsGrid.innerHTML = '';
+            cardCounter = 0; // 🔹 resetear contador
             cargarMascotas();
         }
     });
