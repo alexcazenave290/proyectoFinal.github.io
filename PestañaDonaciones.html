@@ -125,34 +125,55 @@
     <nav>
       <ul>
         <li><a href="index.html">Inicio</a></li>
-        <li><a href="SobreNosotros.html">Sobre Nosotros</a></li>
-        <li><a href="#">Dudas Frecuentes</a></li>
+        <li><a href="SobreNosotros.html">Sobre Nosotros</a></li>>
         <li><a href="#">Asociaciones</a></li>
       </ul>
     </nav>
   </aside>
 
 <div class="donaciones-container">
-  <div class="donaciones-card">
-    <h1>Donaciones</h1>
-    <p>Selecciona las opciones que deseas apoyar:</p>
+    <div class="donaciones-card">
+        <h1>Donaciones</h1>
+        <p>Selecciona las opciones que deseas apoyar:</p>
 
-    <label>
-      <input type="checkbox" id="general"> Donación al proyecto en general
-    </label>
-    <label>
-      <input type="checkbox" id="refugio"> Donación a un refugio en específico
-    </label>
+        <label>
+            <input type="checkbox" id="general"> Donación al proyecto en general
+        </label>
+        <label>
+            <input type="checkbox" id="refugio"> Donación a un refugio en específico
+        </label>
 
-    <p>En caso de seleccionar un refugio específico, especificar aquí:</p>
-    <div class="tooltip">
-      <input type="text" id="input" placeholder="Refugio" style="width: 100%;" disabled />
-      <span class="tooltiptext">Debes elegir "Donación a un refugio en específico" para escribir aquí</span>
+        <p>En caso de seleccionar un refugio específico, especificar aquí:</p>
+        <div class="tooltip">
+            <input type="text" id="input" placeholder="Refugio" style="width: 100%;" disabled />
+            <span class="tooltiptext">Debes elegir "Donación a un refugio en específico" para escribir aquí</span>
+        </div>
+        
+        <br><br> 
+
+        <p>Selecciona el tipo de tarjeta:</p>
+        <label>
+             
+            <input type="radio" name="tipoTarjeta" id="credito" value="credito"> Tarjeta de Crédito
+        </label>
+        <label>
+            <input type="radio" name="tipoTarjeta" id="debito" value="debito"> Tarjeta de Débito
+        </label>
+        
+        <div id="opcionesCredito" style="display: none; margin-top: 15px;">
+            <p>Selecciona tu tarjeta de crédito:</p>
+            <label>
+                <input type="radio" name="tarjetaCredito" value="oca"> Oca
+            </label>
+            <label>
+                <input type="radio" name="tarjetaCredito" value="visa"> Visa
+            </label>
+            <label>
+                <input type="radio" name="tarjetaCredito" value="mastercard"> Mastercard
+            </label>
+        </div>
+        <button class="btn-donar" id="donarBtn">Donar ahora</button>
     </div>
-    
-    <br><br>
-    <button class="btn-donar" id="donarBtn">Donar ahora</button>
-  </div>
 </div>
 
 
@@ -162,33 +183,66 @@
     const input = document.getElementById("input");
     const donarBtn = document.getElementById("donarBtn");
 
-    // Asegurar que solo uno esté seleccionado
-    function handleCheck(e) {
-      if (e.target === general && general.checked) {
-        refugio.checked = false;
-        input.disabled = true;
-      }
-      if (e.target === refugio && refugio.checked) {
-        general.checked = false;
-        input.disabled = false;
-      }
-    }
+    const credito = document.getElementById("credito");
+    const debito = document.getElementById("debito");
+    const opcionesCredito = document.getElementById("opcionesCredito");
 
+    // Asegurar que solo una opción de donación esté seleccionada
+    function handleCheck(e) {
+        if (e.target === general && general.checked) {
+            refugio.checked = false;
+            input.disabled = true;
+        }
+        if (e.target === refugio && refugio.checked) {
+            general.checked = false;
+            input.disabled = false;
+        } // puto el que lee
+    }
+    
     general.addEventListener("change", handleCheck);
     refugio.addEventListener("change", handleCheck);
 
-    // Validar que haya una opción seleccionada antes de donar
+    // Controlar la visibilidad de las opciones de crédito
+    function handleTipoTarjeta() {
+        if (credito.checked) {
+            opcionesCredito.style.display = "block";
+        } else {
+            opcionesCredito.style.display = "none";
+        }
+    }
+    credito.addEventListener("change", handleTipoTarjeta);
+    debito.addEventListener("change", handleTipoTarjeta);
+
+    // Modificado: Validar todas las opciones antes de donar
     donarBtn.addEventListener("click", () => {
-      if (!general.checked && !refugio.checked) {
-        alert("Por favor selecciona una opción de donación.");
-        return;
-      }
-      if (refugio.checked && input.value.trim() === "") {
-        alert("Por favor escribe el nombre del refugio.");
-        return;
-      }
-      alert("¡Gracias por tu donación!");
+        // Validación de tipo de donación
+        if (!general.checked && !refugio.checked) {
+            alert("Por favor selecciona una opción de donación.");
+            return;
+        }
+        if (refugio.checked && input.value.trim() === "") {
+            alert("Por favor escribe el nombre del refugio.");
+            return;
+        }
+
+        // Validación de tipo de tarjeta
+        const tipoTarjetaSeleccionado = document.querySelector('input[name="tipoTarjeta"]:checked');
+        if (!tipoTarjetaSeleccionado) {
+            alert("Por favor selecciona un tipo de tarjeta (Crédito o Débito).");
+            return;
+        }
+
+        // Validación de tarjeta de crédito específica (si aplica)
+        if (credito.checked) {
+            const tarjetaCreditoSeleccionada = document.querySelector('input[name="tarjetaCredito"]:checked');
+            if (!tarjetaCreditoSeleccionada) {
+                alert("Por favor selecciona un tipo de tarjeta de crédito (Oca, Visa, Mastercard).");
+                return;
+            }
+        }
+
+        alert("¡Gracias por tu donación, te lo agradecemos de corazon!");
     });
-  </script>
+</script>
 </body>
 </html>
