@@ -159,7 +159,9 @@ loginForm.addEventListener("submit", e => {
   const username = document.getElementById("login-username").value;
   const password = document.getElementById("login-password").value;
   const user = users.find(u=>u.username===username && u.password===password);
-  if(user){ alert("Bienvenido "+username+" 🐾"); }
+  if(user){;
+  window.location.href = "index.html"; 
+  }
   else{ alert("Usuario o contraseña incorrectos"); }
 });
 registerForm.addEventListener("submit", e => {
@@ -170,8 +172,7 @@ registerForm.addEventListener("submit", e => {
   if(users.find(u=>u.username===username)){ alert("Ese usuario ya existe 🐕"); return; }
   users.push({username,email,password});
   localStorage.setItem("users",JSON.stringify(users));
-  alert("Usuario registrado con éxito 🐾 Ahora puedes iniciar sesión.");
-  toggleLink.click();
+  window.location.href = "index.html";
 });
 
 // Generar patitas animadas CSS
