@@ -33,7 +33,7 @@ const razasPorEspecie = {
 
 // ===== INICIALIZACIÓN =====
 document.addEventListener('DOMContentLoaded', () => {
-    cargarMascotas();
+    cargarMascotasDesdeDB();
     generarPatitas();
     setupEventListeners();
     crearModalComentarios();
@@ -423,6 +423,63 @@ function mostrarMensajeVacio() {
     cardsGrid.appendChild(mensaje);
 }
 
+// FUNCIONALIDAD PARA CARGAR MASCOTAS 
+
+async function cargarMascotasDesdeDB() {
+    try {
+        const response = await fetch('obtenerMascotas.php');
+        const result = await response.json();
+        console.log("Mascotas desde BD:", result);
+
+        if (result.success && result.data.length > 0) {
+            allPets = result.data.map(mascota => ({
+                id: mascota.id_masc,
+                name: mascota.nom_masc || "Sin nombre",
+                raza: mascota.raza_masc || "Desconocida",
+                especie: mascota.especie_masc || "Otro",
+                image: mascota.foto_masc 
+                       ? "uploads/" + mascota.foto_masc 
+                       : "img/default.jpg",
+                edad: mascota.edad_masc || "Desconocida",
+                salud: mascota.salud_masc || "Desconocida",
+                tamano: mascota.tamano_masc || "Mediano",
+                desc: mascota.mail_us || "Sin descripción",
+                adoptado: mascota.estadoAdopt_masc || 0
+            }));
+            
+            aplicarFiltros(); // Esto ya llama a mostrarMascotas()
+        } else {
+            mostrarMensajeVacio();
+        }
+    } catch (error) {
+        console.error("Error al cargar mascotas:", error);
+        mostrarMensajeVacio();
+    }
+}
+
+//FUNCION ADOPTAR MASCOTAS
+
+async function adoptarMascota(id) {
+    try {
+        const response = await fetch("adoptarMascota.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: "id=" + encodeURIComponent(id)
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            alert("🐾 Mascota adoptada con éxito!");
+            cargarMascotasDesdeDB(); // recargar lista desde BD
+        } else {
+            alert("Error: " + result.message);
+        }
+    } catch (err) {
+        console.error("Error al adoptar:", err);
+    }
+}
+
+
 // ===== FUNCIÓN PARA CREAR CARDS =====
 function crearCard(pet) {
     cardCounter++; 
@@ -438,6 +495,16 @@ function crearCard(pet) {
     const isSaved = isCardSaved(cardId);
     const isAdopted = isCardAdopted(cardId);
 
+function crearCard(pet) {
+    const cardId = `card-${pet.id_masc}`; // Usamos el ID de la BD
+
+    const isSaved = isCardSaved(cardId);
+    const isLiked = false; // si luego quieres manejar "likes", aquí se controla
+    const isAdopted = pet.adoptado == 1; // adoptado según BD
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.id = cardId;
     card.innerHTML = `
         <div class="card-header">
             <i class='bx ${isSaved ? "bxs-bookmark saved" : "bx-bookmark"} card-bookmark'></i>
@@ -459,7 +526,11 @@ function crearCard(pet) {
                 <p><b>Especie:</b> ${pet.especie}</p>
                 <p><b>Tamaño:</b> ${pet.tamano}</p>
                 <p><b>Salud:</b> ${pet.salud}</p>
-                <p><b>Estado de adopción:</b> <span class="adoption-status ${isAdopted ? 'adopted' : 'available'}">${isAdopted ? 'Adoptado' : 'En Adopción'}</span></p>
+                <p><b>Estado de adopción:</b> 
+                    <span class="adoption-status ${isAdopted ? 'adopted' : 'available'}">
+                        ${isAdopted ? 'Adoptado' : 'En Adopción'}
+                    </span>
+                </p>
             </div>
             <button class="adopt-button ${isAdopted ? 'adopted' : ''}" ${isAdopted ? 'disabled' : ''}>
                 <i class='bx ${isAdopted ? 'bx-check-circle' : 'bxs-heart'}'></i>
@@ -475,7 +546,18 @@ function crearCard(pet) {
                 </div>
                 <div class="comment-list"></div>
             </div>
-        </div>`;
+        </div>
+    `;
+
+    // 🎯 evento adoptar (usa ID real de BD)
+    const adoptBtn = card.querySelector(".adopt-button");
+    adoptBtn.addEventListener("click", async () => {
+        await adoptarMascota(pet.id);
+    });
+
+    return card;
+}
+
 
     // === Evento botón de adoptar ===
     const adoptBtn = card.querySelector(".adopt-button");
