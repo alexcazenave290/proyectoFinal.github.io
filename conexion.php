@@ -1,25 +1,12 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Prueba de conexión</title>
-</head>
-<body>
 <?php
-$host = "localhost";
-$usuario = "root";
-$password = "";
-$baseDatos = "Conexion";
-
-$conn = new mysqli($host, $usuario, $password, $baseDatos);
-
-if ($conn->connect_error) {
-    die("Error de conexión: " . $conn->connect_error);
-} else {
-    echo "✅ Conexión exitosa a la base de datos $baseDatos";
+$host = 'localhost';
+$dbname = 'Conexion'; 
+$username = 'root';
+$password = ''; 
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch(PDOException $e) {
+    http_response_code(500);
+    die(json_encode(['success' => false, 'error' => $e->getMessage()]));
 }
-
-$conn->close();
-?>
-</body>
-</html>
