@@ -312,11 +312,12 @@
     <h2>Agregar Mascota</h2>
     <input type="file" id="petImage" accept="image/*">
     <input type="text" id="petName" placeholder="Nombre">
-    <textarea id="petDesc" placeholder="Descripción"></textarea>
+    <input type="text" id="petDesc" placeholder="Descripción">
     <input type="text" id="petRaza" placeholder="Raza">
     <input type="text" id="petEspecie" placeholder="Especie">
     <input type="text" id="petTamano" placeholder="Tamaño">
     <input type="text" id="petSalud" placeholder="Estado de salud">
+    <input type="text" id="petEdad" placeholder="Edad">
     <button id="savePet">Guardar</button>
   </div>
 </div>
@@ -331,179 +332,222 @@
   const cardsGrid = document.getElementById("cardsGrid");
   const searchBar = document.getElementById("searchBar");
 
-  let cardCounter = 0;
+  let allPets = [];
 
   addPetBtn.onclick = () => modal.style.display = "flex";
   window.onclick = e => { if(e.target == modal) modal.style.display = "none"; };
 
   document.addEventListener("DOMContentLoaded", () => {
-    const pets = JSON.parse(localStorage.getItem("pets")) || [];
-    if (pets.length === 0) {
-      mostrarMensajeVacio();
-    } else {
-      pets.forEach(p => crearCard(p));
-    }
-    generarPatitas();
-    searchBar.addEventListener("input", filtrarMascotas);
+      cargarMascotas();
+      generarPatitas();
+      searchBar.addEventListener("input", filtrarMascotas);
   });
 
-  savePetBtn.onclick = () => {
-    const file = document.getElementById("petImage").files[0];
-    const reader = new FileReader();
-    reader.onload = e => {
-      const pet = {
-        image: e.target.result,
-        name: document.getElementById("petName").value,
-        desc: document.getElementById("petDesc").value,
-        raza: document.getElementById("petRaza").value,
-        especie: document.getElementById("petEspecie").value,
-        tamano: document.getElementById("petTamano").value,
-        salud: document.getElementById("petSalud").value
-      };
-      const pets = JSON.parse(localStorage.getItem("pets")) || [];
-      pets.push(pet);
-      localStorage.setItem("pets", JSON.stringify(pets));
-      crearCard(pet);
-      modal.style.display = "none";
+  // Cargar mascotas desde PHP
+  async function cargarMascotas() {
+      try {
+          const response = await fetch('obtenerMascotas.php');
+          const result = await response.json();
+          
+          if (result.success) {
+              allPets = result.data;
+              mostrarMascotas(allPets);
+          } else {
+              console.error('Error:', result.error);
+              mostrarMensajeVacio();
+          }
+      } catch (error) {
+          console.error('Error al cargar mascotas:', error);
+          mostrarMensajeVacio();
+      }
+  }
 
-      document.getElementById("petImage").value = "";
-      document.getElementById("petName").value = "";
-      document.getElementById("petDesc").value = "";
-      document.getElementById("petRaza").value = "";
-      document.getElementById("petEspecie").value = "";
-      document.getElementById("petTamano").value = "";
-      document.getElementById("petSalud").value = "";
-    };
-    if(file) reader.readAsDataURL(file);
+  function mostrarMascotas(pets) {
+      cardsGrid.innerHTML = '';
+      if (pets.length === 0) {
+          mostrarMensajeVacio();
+      } else {
+          pets.forEach(p => crearCard(p));
+      }
+  }
+
+  // Guardar mascota en PHP
+  savePetBtn.onclick = async () => {
+      const file = document.getElementById("petImage").files[0];
+      
+      if (!file) {
+          alert('Por favor selecciona una imagen');
+          return;
+      }
+      
+      // Primero subir la imagen
+      const formData = new FormData();
+      formData.append('imagen', file);
+      
+      try {
+          // 1. Subir la imagen
+          const responseImagen = await fetch('subirImagen.php', {
+              method: 'POST',
+              body: formData
+          });
+          
+          const resultImagen = await responseImagen.json();
+          
+          if (!resultImagen.success) {
+              alert('Error al subir imagen: ' + resultImagen.error);
+              return;
+          }
+          
+          // 2. Guardar los datos de la mascota con la ruta de la imagen
+          const pet = {
+              id_inst: 'INST001', // Cambiar por el del usuario logueado
+              mail_us: 'admin@example.com', // Cambiar por el del usuario logueado
+              foto_ruta: resultImagen.ruta, // Aquí va la ruta
+              name: document.getElementById("petName").value,
+              especie: document.getElementById("petEspecie").value,
+              raza: document.getElementById("petRaza").value,
+              tamano: document.getElementById("petTamano").value,
+              edad: document.getElementById("petEdad").value,
+              salud: document.getElementById("petSalud").value
+          };
+          
+          const responseMascota = await fetch('guardarMascota.php', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(pet)
+          });
+          
+          const resultMascota = await responseMascota.json();
+          
+          if (resultMascota.success) {
+              modal.style.display = "none";
+              cargarMascotas();
+              
+              // Limpiar formulario
+              document.getElementById("petImage").value = "";
+              document.getElementById("petName").value = "";
+              document.getElementById("petRaza").value = "";
+              document.getElementById("petEspecie").value = "";
+              document.getElementById("petTamano").value = "";
+              document.getElementById("petEdad").value = "";
+              document.getElementById("petSalud").value = "";
+          } else {
+              alert('Error: ' + resultMascota.error);
+          }
+      } catch (error) {
+          console.error('Error:', error);
+          alert('Error al guardar la mascota');
+      }
   };
 
-function crearCard(pet) {
-    cardCounter++;
-    const cardId = `card-${cardCounter}`;
-    const card = document.createElement("div");
-    card.className = "card";
-    card.id = cardId;
+  function crearCard(pet) {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.dataset.petId = pet.id_masc;
+      card.innerHTML = `
+          <div class="card-header">
+              <i class='bx bx-trash card-delete' title="Eliminar mascota"></i>
+              <span class="card-id">ID: ${pet.id_masc}</span>
+              <i class='bx bx-heart card-like'></i>
+          </div>
+          <img src="${pet.foto_masc}" class="card-img" alt="${pet.nom_masc}">
+          <div class="card-body">
+              <div class="card-info">
+                  <i class='bx bxs-cat'></i> 
+                  <div class="card-title">${pet.nom_masc}</div>
+                  <i class='bx bxs-dog'></i> 
+              </div>
+              <div class="card-desc">${pet.desc_masc}</div>
+              <div class="card-details">
+                  <p><b>Raza:</b> ${pet.raza_masc}</p>
+                  <p><b>Especie:</b> ${pet.especie_masc}</p>
+                  <p><b>Tamaño:</b> ${pet.tamano_masc}</p>
+                  <p><b>Edad:</b> ${pet.edad_masc}</p>
+                  <p><b>Salud:</b> ${pet.salud_masc}</p>
+              </div>
+          </div>
+      `;
 
-    // Revisar si la mascota estaba marcada como "like"
-    const likedPets = JSON.parse(localStorage.getItem("likedPets")) || {};
-    const isLiked = likedPets[cardId] === true;
+      // Evento para el "like"
+      const heartIcon = card.querySelector(".card-like");
+      heartIcon.addEventListener("click", () => {
+          heartIcon.classList.toggle("bx-heart");
+          heartIcon.classList.toggle("bxs-heart");
+          heartIcon.classList.toggle("liked");
+      });
 
-    card.innerHTML = `
-        <div class="card-header">
-            <i class='bx bx-trash card-delete' title="Eliminar mascota"></i>
-            <span class="card-id">ID: ${cardId}</span>
-            <i class='bx bx-message-detail'></i>
-            <i class='bx ${isLiked ? "bxs-heart liked" : "bx-heart"} card-like'></i>
-        </div>
-        <img src="${pet.image}" class="card-img" alt="${pet.name}">
-        <div class="card-body">
-            <div class="card-info">
-                <i class='bx bxs-cat'></i> 
-                <div class="card-title">${pet.name}</div>
-                <i class='bx bxs-dog'></i> 
-            </div>
-            <div class="card-desc">${pet.desc}</div>
-            <div class="card-details">
-                <p><b>Raza:</b> ${pet.raza}</p>
-                <p><b>Especie:</b> ${pet.especie}</p>
-                <p><b>Tamaño:</b> ${pet.tamano}</p>
-                <p><b>Salud:</b> ${pet.salud}</p>
-            </div>
-        </div>
-    `;
+      // Evento para ELIMINAR la mascota
+      const deleteIcon = card.querySelector(".card-delete");
+      deleteIcon.addEventListener("click", async () => {
+          if (confirm('¿Estás seguro de eliminar esta mascota?')) {
+              try {
+                  const response = await fetch('eliminarMascota.php', {
+                      method: 'POST',
+                      headers: {
+                          'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({ id: pet.id_masc })
+                  });
+                  
+                  const result = await response.json();
+                  
+                  if (result.success) {
+                      // Recargar las mascotas
+                      cargarMascotas();
+                  } else {
+                      alert('Error: ' + result.error);
+                  }
+              } catch (error) {
+                  console.error('Error:', error);
+                  alert('Error al eliminar la mascota');
+              }
+          }
+      });
 
-    // Evento para el "like"
-    const heartIcon = card.querySelector(".card-like");
-    heartIcon.addEventListener("click", () => {
-        heartIcon.classList.toggle("bx-heart");
-        heartIcon.classList.toggle("bxs-heart");
-        heartIcon.classList.toggle("liked");
+      cardsGrid.appendChild(card);
+  }
 
-        const likedPets = JSON.parse(localStorage.getItem("likedPets")) || {};
-        likedPets[cardId] = heartIcon.classList.contains("bxs-heart");
-        localStorage.setItem("likedPets", JSON.stringify(likedPets));
-    });
-
-    // Evento para eliminar la tarjeta
-    const deleteIcon = card.querySelector(".card-delete");
-    deleteIcon.addEventListener("click", () => {
-        // Eliminar del localStorage
-        let pets = JSON.parse(localStorage.getItem("pets")) || [];
-        const index = Array.from(cardsGrid.children).indexOf(card);
-        pets.splice(index, 1);
-        localStorage.setItem("pets", JSON.stringify(pets));
-
-        // Eliminar de likedPets
-        let likedPets = JSON.parse(localStorage.getItem("likedPets")) || {};
-        delete likedPets[cardId];
-        localStorage.setItem("likedPets", JSON.stringify(likedPets));
-
-        // Eliminar del DOM
-        card.remove();
-
-        // Mostrar mensaje si no quedan mascotas
-        if (pets.length === 0) mostrarMensajeVacio();
-    });
-
-    cardsGrid.appendChild(card);
-}
-
-
-    function mostrarMensajeVacio() {
-        const mensaje = document.createElement("div");
-        mensaje.className = "no-pets-message";
-        mensaje.innerHTML = `
-            <i class='bx bx-sad' style='font-size: 3rem; color: #b48a5a; display: block; margin-bottom: 10px;'></i>
-            <h3>No hay mascotas disponibles</h3>
-            <p>Ve al formulario de adopción para agregar algunas mascotas.</p>
-        `;
-        cardsGrid.appendChild(mensaje);
-    }
+  function mostrarMensajeVacio() {
+      cardsGrid.innerHTML = `
+          <div class="no-pets-message">
+              <i class='bx bx-sad' style='font-size: 3rem; color: #b48a5a; display: block; margin-bottom: 10px;'></i>
+              <h3>No hay mascotas disponibles</h3>
+              <p>Usa el botón "Agregar" para crear una nueva mascota.</p>
+          </div>
+      `;
+  }
 
   function filtrarMascotas() {
-    const filtro = searchBar.value.toLowerCase();
-    const pets = JSON.parse(localStorage.getItem("pets")) || [];
-    cardsGrid.innerHTML = '';
-    cardCounter = 0;
-
-    if (filtro === '') {
-      if (pets.length === 0) mostrarMensajeVacio();
-      else pets.forEach(p => crearCard(p));
-    } else {
-      const petsFiltradas = pets.filter(pet => 
-        pet.name.toLowerCase().includes(filtro) ||
-        pet.raza.toLowerCase().includes(filtro) ||
-        pet.especie.toLowerCase().includes(filtro) ||
-        pet.desc.toLowerCase().includes(filtro)
-      );
-            if (petsFiltradas.length === 0) {
-                const mensaje = document.createElement("div");
-                mensaje.className = "no-pets-message";
-                mensaje.innerHTML = `
-                    <i class='bx bx-search' style='font-size: 3rem; color: #b48a5a; display: block; margin-bottom: 10px;'></i>
-                    <h3>No se encontraron mascotas</h3>
-                    <p>No hay mascotas que coincidan con "${filtro}"</p>
-                `;
-                cardsGrid.appendChild(mensaje);
-            } else {
-                petsFiltradas.forEach(pet => crearCard(pet));
-            }
-    }
+      const filtro = searchBar.value.toLowerCase();
+      
+      if (filtro === '') {
+          mostrarMascotas(allPets);
+      } else {
+          const petsFiltradas = allPets.filter(pet => 
+              pet.nombre.toLowerCase().includes(filtro) ||
+              pet.raza.toLowerCase().includes(filtro) ||
+              pet.especie.toLowerCase().includes(filtro) ||
+              pet.descripcion.toLowerCase().includes(filtro)
+          );
+          mostrarMascotas(petsFiltradas);
+      }
   }
 
   function generarPatitas() {
-    const container = document.getElementById('paw-container');
-    const cantidad = 15;
-    for (let i = 0; i < cantidad; i++) {
-      const paw = document.createElement('img');
-      paw.src = 'img/pawBackground.png';
-      paw.className = 'paw-bg';
-      paw.style.width = `${30 + Math.random() * 40}px`;
-      paw.style.left = `${Math.random() * window.innerWidth}px`;
-      paw.style.top = `${Math.random() * window.innerHeight}px`;
-      paw.style.animationDuration = `${2 + Math.random() * 3}s`;
-      container.appendChild(paw);
-    }
+      const container = document.getElementById('paw-container');
+      const cantidad = 15;
+      for (let i = 0; i < cantidad; i++) {
+          const paw = document.createElement('img');
+          paw.src = 'img/pawBackground.png';
+          paw.className = 'paw-bg';
+          paw.style.width = `${30 + Math.random() * 40}px`;
+          paw.style.left = `${Math.random() * window.innerWidth}px`;
+          paw.style.top = `${Math.random() * window.innerHeight}px`;
+          paw.style.animationDuration = `${2 + Math.random() * 3}s`;
+          container.appendChild(paw);
+      }
   }
 </script>
 
