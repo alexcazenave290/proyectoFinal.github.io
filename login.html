@@ -92,8 +92,8 @@ body {
 
   <form id="login-form">
     <div class="form-floating mb-3">
-      <input type="text" class="form-control" id="login-username" placeholder="Usuario" required>
-      <label for="login-username">Usuario</label>
+      <input type="email" class="form-control" id="login-gmail" placeholder="Gmail" required>
+      <label for="login-gmail">Gmail</label>
     </div>
     <div class="form-floating mb-4">
       <input type="password" class="form-control" id="login-password" placeholder="Contraseña" required>
@@ -102,14 +102,16 @@ body {
     <button type="submit" class="btn btn-primary w-100">Entrar</button>
   </form>
 
+
   <form id="register-form" style="display:none;">
+    <div class="form-floating mb-3">
+      <input type="email" class="form-control" id="email" placeholder="Gmail" required>
+      <label for="email">Gmail</label>
+    </div>
+    <!-- Otros campos como nombre, contraseña, etc -->
     <div class="form-floating mb-3">
       <input type="text" class="form-control" id="new-username" placeholder="Usuario" required>
       <label for="new-username">Usuario</label>
-    </div>
-    <div class="form-floating mb-3">
-      <input type="email" class="form-control" id="email" placeholder="Email" required>
-      <label for="email">Email</label>
     </div>
     <div class="form-floating mb-4">
       <input type="password" class="form-control" id="new-password" placeholder="Contraseña" required>
@@ -152,55 +154,64 @@ toggleLink.addEventListener("click", () => {
   }
 });
 
-// Simulación localStorage
-const users = JSON.parse(localStorage.getItem("users")) || [];
-loginForm.addEventListener("submit", e => {
+// LOGIN
+loginForm.addEventListener("submit", async e => {
   e.preventDefault();
-  const username = document.getElementById("login-username").value;
-  const password = document.getElementById("login-password").value;
-  const user = users.find(u=>u.username===username && u.password===password);
-  if(user){;
-  window.location.href = "index.html"; 
+  const mail_us = document.getElementById("login-gmail").value; // Gmail
+  const contrasena_us = document.getElementById("login-password").value;
+  const formData = new FormData();
+  formData.append("mail_us", mail_us);
+  formData.append("contrasena_us", contrasena_us);
+
+  const res = await fetch("login.php", { method: "POST", body: formData });
+  const data = await res.json();
+  if(data.success){
+    window.location.href = "index.php";
+  } else {
+    alert(data.message || "Usuario o contraseña incorrectos");
   }
-  else{ alert("Usuario o contraseña incorrectos"); }
-});
-registerForm.addEventListener("submit", e => {
-  e.preventDefault();
-  const username = document.getElementById("new-username").value;
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("new-password").value;
-  if(users.find(u=>u.username===username)){ alert("Ese usuario ya existe 🐕"); return; }
-  users.push({username,email,password});
-  localStorage.setItem("users",JSON.stringify(users));
-  window.location.href = "index.html";
 });
 
-// Generar patitas animadas CSS
+// REGISTRO
+registerForm.addEventListener("submit", async e => {
+  e.preventDefault();
+  const mail_us = document.getElementById("email").value; // Gmail
+  const contrasena_us = document.getElementById("new-password").value;
+  const nom_us = document.getElementById("new-username").value;
+  const formData = new FormData();
+  formData.append("mail_us", mail_us);
+  formData.append("contrasena_us", contrasena_us);
+  formData.append("nom_us", nom_us);
+
+  const res = await fetch("register.php", { method: "POST", body: formData });
+  const data = await res.json();
+  if(data.success){
+    window.location.href = "index.php";
+  } else {
+    alert(data.message || "No se pudo registrar");
+  }
+});
+
+// Patitas animadas (igual que antes)
 const background = document.getElementById("background-paws");
 const totalPaws = 50;
-
 for(let i=0;i<totalPaws;i++){
   const paw = document.createElement("img");
   paw.src="img/pawBackground.png";
   paw.classList.add("paw-bg");
-
   const x = Math.random()*(window.innerWidth-50);
   const y = Math.random()*(window.innerHeight-50);
   const scale = 0.4 + Math.random()*0.6;
   const rotate = Math.random()*360;
-
   paw.style.left = x + "px";
   paw.style.top = y + "px";
-  paw.style.width = 30 + Math.random()*40 + "px"; // tamaño random
+  paw.style.width = 30 + Math.random()*40 + "px";
   paw.style.opacity = 0.4 + Math.random()*0.5;
   paw.style.transform = `scale(${scale}) rotate(${rotate}deg)`;
-
-  // Velocidad y delay random para animaciones CSS
-  const duration = 5 + Math.random()*5; // 5s a 10s
+  const duration = 5 + Math.random()*5;
   const delay = Math.random()*5;
   paw.style.animationDuration = duration + "s";
   paw.style.animationDelay = delay + "s";
-
   background.appendChild(paw);
 }
 </script>

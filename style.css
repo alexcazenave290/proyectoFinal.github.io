@@ -201,6 +201,10 @@ body {
         margin-left: auto;
         margin-right: auto;
     }
+    .card-like.liked {
+        color: #e63946 !important; /* rojo */
+        transition: color 0.2s;
+    }
     .header {
         width: 95vw;
         min-width: 220px;

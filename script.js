@@ -10,7 +10,6 @@ const saludFilter = document.getElementById('saludFilter');
 const clearFilters = document.getElementById('clearFilters');
 const activeFilters = document.getElementById('activeFilters');
 
-// ===== CONFIGURACIÓN =====
 const cantidadPatitas = 15;
 const tamanoMin = 30;
 const tamanoMax = 70;
@@ -21,26 +20,76 @@ let cardCounter = 0;
 let allPets = [];
 let filteredPets = [];
 
-// Mapeo de razas por especie
-const razasPorEspecie = {
-    perro: ['Labrador', 'Golden Retriever', 'Bulldog', 'Pastor Alemán', 'Chihuahua', 'Poodle', 'Mestizo'],
-    gato: ['Persa', 'Siamés', 'Maine Coon', 'Ragdoll', 'Bengalí', 'Británico', 'Mestizo'],
-    conejo: ['Holandés', 'Angora', 'Mini Lop', 'Rex', 'Lionhead'],
-    hamster: ['Sirio', 'Roborovski', 'Campbell', 'Winter White'],
-    ave: ['Canario', 'Periquito', 'Ninfa', 'Agapornis', 'Jilguero'],
-    otro: ['Mestizo', 'Criollo', 'Sin definir']
-};
+// Likes del usuario (IDs de publicaciones)
+let userLikes = [];
 
-// ===== INICIALIZACIÓN =====
+// ===== CARGAR LIKES DEL USUARIO AL INICIAR =====
 document.addEventListener('DOMContentLoaded', () => {
     cargarMascotasDesdeDB(); // Carga desde la base de datos
     generarPatitas();
     setupEventListeners();
     crearModalComentarios();
+    cargarLikesUsuario();
 });
 
+// ===== FUNCIONES DE LIKES =====
+async function cargarLikesUsuario() {
+    try {
+        const response = await fetch('get_likes.php');
+        const likes = await response.json();
+        userLikes = likes.map(Number);
+        marcarLikesEnCards();
+    } catch (e) {
+        userLikes = [];
+    }
+}
+
+function marcarLikesEnCards() {
+    document.querySelectorAll('.card-like').forEach(btn => {
+        const id = parseInt(btn.dataset.idPubl);
+        if (userLikes.includes(id)) {
+            btn.classList.remove('bx-heart');
+            btn.classList.add('bxs-heart', 'liked');
+        } else {
+            btn.classList.remove('bxs-heart', 'liked');
+            btn.classList.add('bx-heart');
+        }
+    });
+}
+
+// ===== DELEGACIÓN DE EVENTO GLOBAL PARA LIKE =====
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('card-like')) {
+        e.stopPropagation();
+        const heartIcon = e.target;
+        const idPubl = heartIcon.dataset.idPubl;
+        toggleLike(idPubl, heartIcon);
+    }
+});
+
+async function toggleLike(idPubl, heartIcon) {
+    try {
+        const response = await fetch('like.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'id_publ=' + encodeURIComponent(idPubl)
+        });
+        const data = await response.json();
+        if (data.liked) {
+            heartIcon.classList.remove('bx-heart');
+            heartIcon.classList.add('bxs-heart', 'liked');
+            heartIcon.style.color = "#e63946";
+        } else {
+            heartIcon.classList.remove('bxs-heart', 'liked');
+            heartIcon.classList.add('bx-heart');
+            heartIcon.style.color = "";
+        }
+    } catch (e) {
+        alert("Debes iniciar sesión para dar like.");
+    }
+}
+
 // ===== FUNCIONES DE GUARDADOS =====
-// ===== FUNCIONES DE GUARDADOS SOLO BASE DE DATOS =====
 async function toggleGuardado(cardId, petId) {
     try {
         const response = await fetch('guardarGuardado.php', {
@@ -260,6 +309,7 @@ function aplicarFiltros() {
     
     mostrarMascotas();
     actualizarFiltrosActivos();
+    marcarLikesEnCards();
 }
 
 function limpiarFiltros() {
@@ -361,6 +411,7 @@ function mostrarMascotas() {
     } else {
         filteredPets.forEach(pet => crearCard(pet));
     }
+    marcarLikesEnCards();
 }
 
 function mostrarMensajeSinResultados() {
@@ -416,7 +467,7 @@ async function cargarMascotasDesdeDB() {
                 image: mascota.foto_masc ? mascota.foto_masc : "img/default.jpg",
                 edad: mascota.edad_masc || "Desconocida",
                 salud: mascota.salud_masc || "Desconocida",
-                tamano: mascota.tamano_masc || "Mediano",
+                tamano: mascota.tamano_masc || "Desconocida",
                 desc: mascota.desc_masc || "Sin descripción",
                 adoptado: mascota.estadoAdopt_masc || 0
             }));
@@ -452,7 +503,6 @@ async function adoptarMascota(id) {
     }
 }
 
-
 // ===== FUNCIÓN PARA CREAR CARDS =====
 function crearCard(pet) {
     const cardId = `card-${pet.id}`;
@@ -468,7 +518,7 @@ function crearCard(pet) {
             <i class='bx bx-bookmark card-bookmark'></i>
             <div class="card-actions">
                 <i class='bx bx-message-detail card-comment'></i>
-                <i class='bx bx-heart card-like'></i>
+                <i class='bx bx-heart card-like' data-id-publ="${pet.id}"></i>
             </div>
         </div>
         <img src="${pet.image}" class="card-img" alt="${pet.name}">
@@ -558,15 +608,16 @@ function crearCard(pet) {
         }
     });
 
-    // === Evento click corazón ===
+    // CORAZON LIKE
+
     const heartIcon = card.querySelector(".card-like");
-    heartIcon.addEventListener("click", (e) => {
-        e.stopPropagation();
-        heartIcon.classList.toggle("bx-heart");
-        heartIcon.classList.toggle("bxs-heart");
-        heartIcon.classList.toggle("liked");
-        // Si se quiere guardar likes en BD, aquí iría el fetch
-    });
+    if (userLikes.includes(Number(pet.id))) {
+        heartIcon.classList.remove('bx-heart');
+        heartIcon.classList.add('bxs-heart', 'liked');
+    } else {
+        heartIcon.classList.remove('bxs-heart', 'liked');
+        heartIcon.classList.add('bx-heart');
+    }
 
     // === Evento click en comentarios ===
     const commentIcon = card.querySelector(".card-comment");
@@ -618,7 +669,6 @@ function crearCard(pet) {
 }
 
 // ===== FUNCIONES DE COMENTARIOS =====
-// ===== FUNCIONES DE COMENTARIOS SOLO BD =====
 async function guardarComentarioBD(id_masc, texto) {
     try {
         const response = await fetch('comentarios.php', {

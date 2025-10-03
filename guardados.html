@@ -495,7 +495,7 @@
         </div>
         <nav>
             <ul>
-                <li><a href="index.html">Inicio</a></li>
+                <li><a href="index.php">Inicio</a></li>
                 <li><a href="PestañaDonaciones.html">Donaciones</a></li>
                 <li><a href="SobreNosotros.html">Sobre Nosotros</a></li>
                 <li><a href="Asociaciones.html">Asociaciones</a></li>
@@ -638,43 +638,45 @@ function setupEventListeners() {
 }
 
 // ===== FUNCIONES DE CARGA Y VISUALIZACIÓN =====
-function cargarMascotasGuardadas() {
-    const pets = JSON.parse(localStorage.getItem("pets")) || [];
-    allPets = pets;
-    savedPetsIds = getSavedPetsIds();
-    
-    if (savedPetsIds.length === 0) {
+async function cargarMascotasGuardadas() {
+    try {
+        const response = await fetch('obtenerGuardadosUsuario.php');
+        const result = await response.json();
+        if (result.success && result.data.length > 0) {
+            allPets = result.data.map(mascota => ({
+                id: mascota.id_masc,
+                name: mascota.nom_masc || "Sin nombre",
+                raza: mascota.raza_masc || "Desconocida",
+                especie: mascota.especie_masc || "Otro",
+                image: mascota.foto_masc ? mascota.foto_masc : "img/default.jpg",
+                edad: mascota.edad_masc || "Desconocida",
+                salud: mascota.salud_masc || "Desconocida",
+                tamano: mascota.tamano_masc || "Desconocida",
+                desc: mascota.desc_masc || "Sin descripción",
+                adoptado: mascota.estadoAdopt_masc || 0
+            }));
+            mostrarMascotasGuardadas();
+        } else {
+            mostrarMensajeVacio();
+        }
+    } catch (error) {
+        console.error("Error al cargar guardados:", error);
         mostrarMensajeVacio();
-    } else {
-        mostrarMascotasGuardadas();
     }
 }
 
 function mostrarMascotasGuardadas() {
     cardsGrid.innerHTML = '';
     cardCounter = 0;
-    
-    const mascotasGuardadas = [];
-    
-    savedPetsIds.forEach(savedId => {
-        const index = parseInt(savedId.split('-')[1]) - 1;
-        if (index >= 0 && index < allPets.length) {
-            mascotasGuardadas.push({
-                pet: allPets[index],
-                originalIndex: index + 1
-            });
-        }
-    });
-    
-    if (mascotasGuardadas.length === 0) {
+
+    if (allPets.length === 0) {
         mostrarMensajeVacio();
     } else {
-        mascotasGuardadas.forEach(item => {
-            crearCard(item.pet, item.originalIndex);
+        allPets.forEach(pet => {
+            crearCard(pet, pet.id);
         });
     }
 }
-
 function mostrarMensajeVacio() {
     const mensaje = document.createElement("div");
     mensaje.className = "no-pets-message";
@@ -682,7 +684,7 @@ function mostrarMensajeVacio() {
         <i class='bx bxs-bookmark-minus' style='font-size: 3rem; color: #b48a5a; display: block; margin-bottom: 10px;'></i>
         <h3>No tienes publicaciones guardadas</h3>
         <p>Las mascotas que guardes aparecerán aquí para que puedas verlas más tarde.</p>
-        <a href="index.html" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: #b48a5a; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">
+        <a href="index.php" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: #b48a5a; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">
             <i class='bx bx-home'></i> Ir al inicio
         </a>
     `;
@@ -698,10 +700,9 @@ function crearCard(pet, originalIndex) {
     card.className = "card";
     card.id = cardId;
 
+    // El corazón (like) y comentarios pueden seguir usando localStorage si lo deseas
     const likedPets = JSON.parse(localStorage.getItem("likedPets")) || {};
     const isLiked = likedPets[cardId] === true;
-    
-    const isSaved = true;
     const isAdopted = isCardAdopted(cardId);
 
     card.innerHTML = `
@@ -746,13 +747,10 @@ function crearCard(pet, originalIndex) {
     // === Evento botón de adoptar ===
     const adoptBtn = card.querySelector(".adopt-button");
     const statusBadge = card.querySelector(".adoption-status");
-    
     adoptBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        
         if (!isCardAdopted(cardId)) {
             const nowAdopted = toggleAdopcion(cardId);
-            
             if (nowAdopted) {
                 adoptBtn.classList.add('adopted');
                 adoptBtn.innerHTML = '<i class="bx bx-check-circle"></i> Adoptado';
@@ -764,11 +762,16 @@ function crearCard(pet, originalIndex) {
         }
     });
 
-    // === Evento click en bookmark (quitar de guardados) ===
+    // === Evento click en bookmark (quitar de guardados en BD) ===
     const bookmarkIcon = card.querySelector(".card-bookmark");
-    bookmarkIcon.addEventListener("click", (e) => {
+    bookmarkIcon.addEventListener("click", async (e) => {
         e.stopPropagation();
-        toggleGuardado(cardId);
+        await fetch('guardarGuardado.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_masc: pet.id })
+        });
+        cargarMascotasGuardadas();
     });
 
     // === Evento click corazón ===
@@ -797,7 +800,6 @@ function crearCard(pet, originalIndex) {
         e.stopPropagation();
         const isVisible = commentSection.style.display === "block";
         commentSection.style.display = isVisible ? "none" : "block";
-        
         if (!isVisible) {
             setTimeout(() => commentInput.focus(), 100);
         }
@@ -835,7 +837,6 @@ function crearCard(pet, originalIndex) {
             !e.target.closest(".card-bookmark") &&
             !e.target.closest(".comment-section") &&
             !e.target.closest(".adopt-button")) {
-            
             abrirModalComentarios(cardId, pet.name);
         }
     });
