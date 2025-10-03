@@ -33,45 +33,36 @@ const razasPorEspecie = {
 
 // ===== INICIALIZACIÓN =====
 document.addEventListener('DOMContentLoaded', () => {
-    cargarMascotasDesdeDB();
+    cargarMascotasDesdeDB(); // Carga desde la base de datos
     generarPatitas();
     setupEventListeners();
     crearModalComentarios();
-    actualizarTodasLasOpciones();
 });
 
 // ===== FUNCIONES DE GUARDADOS =====
-function toggleGuardado(cardId) {
-    const savedPets = JSON.parse(localStorage.getItem("savedPets")) || {};
-    savedPets[cardId] = !savedPets[cardId];
-    localStorage.setItem("savedPets", JSON.stringify(savedPets));
-    
-    window.dispatchEvent(new Event('savedPetsUpdated'));
-    
-    return savedPets[cardId];
+// ===== FUNCIONES DE GUARDADOS SOLO BASE DE DATOS =====
+async function toggleGuardado(cardId, petId) {
+    try {
+        const response = await fetch('guardarGuardado.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_masc: petId })
+        });
+        const result = await response.json();
+        return result.success;
+    } catch (e) {
+        return false;
+    }
 }
 
-function isCardSaved(cardId) {
-    const savedPets = JSON.parse(localStorage.getItem("savedPets")) || {};
-    return savedPets[cardId] === true;
-}
-
-function actualizarIconosGuardados() {
-    const cards = document.querySelectorAll('.card');
-    cards.forEach(card => {
-        const cardId = card.id;
-        const bookmarkIcon = card.querySelector('.card-bookmark');
-        if (bookmarkIcon) {
-            const isSaved = isCardSaved(cardId);
-            if (isSaved) {
-                bookmarkIcon.classList.remove('bx-bookmark');
-                bookmarkIcon.classList.add('bxs-bookmark', 'saved');
-            } else {
-                bookmarkIcon.classList.remove('bxs-bookmark', 'saved');
-                bookmarkIcon.classList.add('bx-bookmark');
-            }
-        }
-    });
+async function isCardSaved(cardId, petId) {
+    try {
+        const response = await fetch('obtenerGuardado.php?id_masc=' + encodeURIComponent(petId));
+        const result = await response.json();
+        return result.saved === true;
+    } catch (e) {
+        return false;
+    }
 }
 
 // ===== FUNCIONES DE ADOPCIÓN =====
@@ -133,20 +124,7 @@ function setupEventListeners() {
     window.addEventListener('storage', function(e) {
         if (e.key === 'pets') {
             cardsGrid.innerHTML = '';
-            cardCounter = 0; 
-            cargarMascotas();
-            actualizarTodasLasOpciones();
         }
-        if (e.key === 'savedPets') {
-            actualizarIconosGuardados();
-        }
-        if (e.key === 'adoptedPets') {
-            actualizarEstadosAdopcion();
-        }
-    });
-    
-    window.addEventListener('savedPetsUpdated', function() {
-        actualizarIconosGuardados();
     });
     
     window.addEventListener('adoptedPetsUpdated', function() {
@@ -429,25 +407,20 @@ async function cargarMascotasDesdeDB() {
     try {
         const response = await fetch('obtenerMascotas.php');
         const result = await response.json();
-        console.log("Mascotas desde BD:", result);
-
         if (result.success && result.data.length > 0) {
             allPets = result.data.map(mascota => ({
                 id: mascota.id_masc,
                 name: mascota.nom_masc || "Sin nombre",
                 raza: mascota.raza_masc || "Desconocida",
                 especie: mascota.especie_masc || "Otro",
-                image: mascota.foto_masc 
-                       ? "uploads/" + mascota.foto_masc 
-                       : "img/default.jpg",
+                image: mascota.foto_masc ? mascota.foto_masc : "img/default.jpg",
                 edad: mascota.edad_masc || "Desconocida",
                 salud: mascota.salud_masc || "Desconocida",
                 tamano: mascota.tamano_masc || "Mediano",
-                desc: mascota.mail_us || "Sin descripción",
+                desc: mascota.desc_masc || "Sin descripción",
                 adoptado: mascota.estadoAdopt_masc || 0
             }));
-            
-            aplicarFiltros(); // Esto ya llama a mostrarMascotas()
+            aplicarFiltros();
         } else {
             mostrarMensajeVacio();
         }
@@ -482,35 +455,20 @@ async function adoptarMascota(id) {
 
 // ===== FUNCIÓN PARA CREAR CARDS =====
 function crearCard(pet) {
-    cardCounter++; 
-    const cardId = `card-${cardCounter}`;
-
-    const card = document.createElement("div");
-    card.className = "card";
-    card.id = cardId;
-
-    const likedPets = JSON.parse(localStorage.getItem("likedPets")) || {};
-    const isLiked = likedPets[cardId] === true;
-    
-    const isSaved = isCardSaved(cardId);
-    const isAdopted = isCardAdopted(cardId);
-
-function crearCard(pet) {
-    const cardId = `card-${pet.id_masc}`; // Usamos el ID de la BD
-
-    const isSaved = isCardSaved(cardId);
-    const isLiked = false; // si luego quieres manejar "likes", aquí se controla
-    const isAdopted = pet.adoptado == 1; // adoptado según BD
+    const cardId = `card-${pet.id}`;
+    let isSaved = false;
+    let isLiked = false;
+    const isAdopted = pet.adoptado == 1;
 
     const card = document.createElement("div");
     card.className = "card";
     card.id = cardId;
     card.innerHTML = `
         <div class="card-header">
-            <i class='bx ${isSaved ? "bxs-bookmark saved" : "bx-bookmark"} card-bookmark'></i>
+            <i class='bx bx-bookmark card-bookmark'></i>
             <div class="card-actions">
                 <i class='bx bx-message-detail card-comment'></i>
-                <i class='bx ${isLiked ? "bxs-heart liked" : "bx-heart"} card-like'></i>
+                <i class='bx bx-heart card-like'></i>
             </div>
         </div>
         <img src="${pet.image}" class="card-img" alt="${pet.name}">
@@ -526,6 +484,7 @@ function crearCard(pet) {
                 <p><b>Especie:</b> ${pet.especie}</p>
                 <p><b>Tamaño:</b> ${pet.tamano}</p>
                 <p><b>Salud:</b> ${pet.salud}</p>
+                <p><b>Edad:</b> ${pet.edad}</p>
                 <p><b>Estado de adopción:</b> 
                     <span class="adoption-status ${isAdopted ? 'adopted' : 'available'}">
                         ${isAdopted ? 'Adoptado' : 'En Adopción'}
@@ -549,26 +508,31 @@ function crearCard(pet) {
         </div>
     `;
 
-    // 🎯 evento adoptar (usa ID real de BD)
+    // Consultar si está guardado
+    isCardSaved(cardId, pet.id).then(saved => {
+        isSaved = saved;
+        const bookmarkIcon = card.querySelector(".card-bookmark");
+        if (isSaved) {
+            bookmarkIcon.classList.remove("bx-bookmark");
+            bookmarkIcon.classList.add("bxs-bookmark", "saved");
+        } else {
+            bookmarkIcon.classList.remove("bxs-bookmark", "saved");
+            bookmarkIcon.classList.add("bx-bookmark");
+        }
+    });
+
+    // Evento adoptar (opcional, si quieres que funcione el botón Adoptar con backend)
     const adoptBtn = card.querySelector(".adopt-button");
     adoptBtn.addEventListener("click", async () => {
         await adoptarMascota(pet.id);
     });
 
-    return card;
-}
-
-
-    // === Evento botón de adoptar ===
-    const adoptBtn = card.querySelector(".adopt-button");
+    // === Evento botón de adoptar (localStorage) ===
     const statusBadge = card.querySelector(".adoption-status");
-    
     adoptBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        
         if (!isCardAdopted(cardId)) {
             const nowAdopted = toggleAdopcion(cardId);
-            
             if (nowAdopted) {
                 adoptBtn.classList.add('adopted');
                 adoptBtn.innerHTML = '<i class="bx bx-check-circle"></i> Adoptado';
@@ -582,10 +546,9 @@ function crearCard(pet) {
 
     // === Evento click en bookmark (guardar) ===
     const bookmarkIcon = card.querySelector(".card-bookmark");
-    bookmarkIcon.addEventListener("click", (e) => {
+    bookmarkIcon.addEventListener("click", async (e) => {
         e.stopPropagation();
-        const nowSaved = toggleGuardado(cardId);
-        
+        const nowSaved = await toggleGuardado(cardId, pet.id);
         if (nowSaved) {
             bookmarkIcon.classList.remove("bx-bookmark");
             bookmarkIcon.classList.add("bxs-bookmark", "saved");
@@ -602,10 +565,7 @@ function crearCard(pet) {
         heartIcon.classList.toggle("bx-heart");
         heartIcon.classList.toggle("bxs-heart");
         heartIcon.classList.toggle("liked");
-
-        const likedPets = JSON.parse(localStorage.getItem("likedPets")) || {};
-        likedPets[cardId] = heartIcon.classList.contains("bxs-heart");
-        localStorage.setItem("likedPets", JSON.stringify(likedPets));
+        // Si se quiere guardar likes en BD, aquí iría el fetch
     });
 
     // === Evento click en comentarios ===
@@ -614,44 +574,36 @@ function crearCard(pet) {
     const commentInput = card.querySelector(".comment-input");
     const commentBtn = card.querySelector(".comment-btn");
     const commentList = card.querySelector(".comment-list");
-
-    mostrarComentarios(cardId, commentList);
-
+    mostrarComentariosBD(pet.id, commentList);
     commentIcon.addEventListener("click", (e) => {
         e.stopPropagation();
         const isVisible = commentSection.style.display === "block";
         commentSection.style.display = isVisible ? "none" : "block";
-        
         if (!isVisible) {
             setTimeout(() => commentInput.focus(), 100);
         }
     });
-
-    const enviarComentario = () => {
+    const enviarComentario = async () => {
         const texto = commentInput.value.trim();
         if (texto !== "") {
-            guardarComentario(cardId, texto);
+            await guardarComentarioBD(pet.id, texto);
             commentInput.value = "";
-            mostrarComentarios(cardId, commentList);
+            mostrarComentariosBD(pet.id, commentList);
         }
     };
-
     commentBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         enviarComentario();
     });
-
     commentInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
             enviarComentario();
         }
     });
-
     commentSection.addEventListener("click", (e) => {
         e.stopPropagation();
     });
-
     // === Evento click izquierdo en la card para abrir modal ===
     card.addEventListener("click", (e) => {
         if (!e.target.closest(".card-like") && 
@@ -659,70 +611,66 @@ function crearCard(pet) {
             !e.target.closest(".card-bookmark") &&
             !e.target.closest(".comment-section") &&
             !e.target.closest(".adopt-button")) {
-            
             abrirModalComentarios(cardId, pet.name);
         }
     });
-
     cardsGrid.appendChild(card);
 }
 
 // ===== FUNCIONES DE COMENTARIOS =====
-function guardarComentario(cardId, texto) {
-    const comentarios = JSON.parse(localStorage.getItem("comentarios")) || {};
-    if (!comentarios[cardId]) comentarios[cardId] = [];
-    comentarios[cardId].push({
-        texto: texto,
-        fecha: new Date().toLocaleString()
-    });
-    localStorage.setItem("comentarios", JSON.stringify(comentarios));
+// ===== FUNCIONES DE COMENTARIOS SOLO BD =====
+async function guardarComentarioBD(id_masc, texto) {
+    try {
+        const response = await fetch('comentarios.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_masc: id_masc, comentario: texto, usuario: 'Anónimo' })
+        });
+        const result = await response.json();
+        return result.success;
+    } catch (e) {
+        return false;
+    }
 }
 
-function mostrarComentarios(cardId, container) {
+async function mostrarComentariosBD(id_masc, container) {
     container.innerHTML = "";
-    const comentarios = JSON.parse(localStorage.getItem("comentarios")) || {};
-    const lista = comentarios[cardId] || [];
-    
-    if (lista.length === 0) {
-        container.innerHTML = '<div class="no-comments">No hay comentarios aún. ¡Sé el primero en comentar!</div>';
-        return;
-    }
-    
-    lista.forEach(comentario => {
-        const div = document.createElement("div");
-        div.className = "comment-item";
-        
-        if (typeof comentario === 'string') {
-            div.innerHTML = `💬 ${comentario}`;
+    try {
+        const response = await fetch('comentarios.php?id_masc=' + encodeURIComponent(id_masc));
+        const result = await response.json();
+        if (result.success && result.comentarios.length > 0) {
+            result.comentarios.forEach(comentario => {
+                const div = document.createElement("div");
+                div.className = "comment-item";
+                div.innerHTML = '💬 ' + comentario.texto +
+                    (comentario.usuario ? ` <span style=\"color:#888;font-size:0.9em;\">- ${comentario.usuario}</span>` : '') +
+                    (comentario.fecha ? ` <span style=\"color:#bbb;font-size:0.8em;\">[${comentario.fecha}]</span>` : '');
+                container.appendChild(div);
+            });
         } else {
-            div.innerHTML = `💬 ${comentario.texto}`;
+            container.innerHTML = '<div class="no-comments">No hay comentarios aún. ¡Sé el primero en comentar!</div>';
         }
-        
-        container.appendChild(div);
-    });
-    
-    container.scrollTop = container.scrollHeight;
+        container.scrollTop = container.scrollHeight;
+    } catch (e) {
+        container.innerHTML = '<div class="no-comments">No se pudieron cargar comentarios.</div>';
+    }
 }
 
 // ===== FUNCIONES DE MODAL =====
 function crearModalComentarios() {
-    const modal = document.createElement("div");
+    var modal = document.createElement("div");
     modal.id = "modal-comentarios";
     modal.style.display = "none";
-    modal.innerHTML = `
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2 id="modal-title"></h2>
-            <div id="modal-comments"></div>
-        </div>
-    `;
+    modal.innerHTML = '<div class="modal-content">' +
+        '<span class="close-btn">&times;</span>' +
+        '<h2 id="modal-title"></h2>' +
+        '<div id="modal-comments"></div>' +
+        '</div>';
     document.body.appendChild(modal);
-
-    modal.querySelector(".close-btn").addEventListener("click", () => {
+    modal.querySelector(".close-btn").addEventListener("click", function() {
         modal.style.display = "none";
     });
-
-    modal.addEventListener("click", (e) => {
+    modal.addEventListener("click", function(e) {
         if (e.target === modal) {
             modal.style.display = "none";
         }
@@ -730,67 +678,62 @@ function crearModalComentarios() {
 }
 
 function abrirModalComentarios(cardId, petName) {
-    const modal = document.getElementById("modal-comentarios");
-    const title = modal.querySelector("#modal-title");
-    const commentsDiv = modal.querySelector("#modal-comments");
-
+    var modal = document.getElementById("modal-comentarios");
+    var title = modal.querySelector("#modal-title");
+    var commentsDiv = modal.querySelector("#modal-comments");
     title.textContent = "Comentarios de " + petName;
     commentsDiv.innerHTML = "";
-
-    const comentarios = JSON.parse(localStorage.getItem("comentarios")) || {};
-    const lista = comentarios[cardId] || [];
-
+    var comentarios = JSON.parse(localStorage.getItem("comentarios")) || {};
+    var lista = comentarios[cardId] || [];
     if (lista.length === 0) {
         commentsDiv.innerHTML = '<div class="no-comments">No hay comentarios aún.</div>';
     } else {
-        lista.forEach(comentario => {
-            const div = document.createElement("div");
+        for (var i = 0; i < lista.length; i++) {
+            var comentario = lista[i];
+            var div = document.createElement("div");
             div.className = "comment-item";
-            
             if (typeof comentario === 'string') {
-                div.innerHTML = `💬 ${comentario}`;
+                div.innerHTML = '💬 ' + comentario;
             } else {
-                div.innerHTML = `💬 ${comentario.texto}`;
+                div.innerHTML = '💬 ' + comentario.texto;
             }
-            
             commentsDiv.appendChild(div);
-        });
+        }
     }
-
     modal.style.display = "flex";
 }
 
 // ===== FUNCIÓN PARA GENERAR PATITAS ANIMADAS =====
 function generarPatitas() {
-    const container = document.getElementById('paw-container');
-    const containerWidth = window.innerWidth - sidebarWidth;
-    const containerHeight = window.innerHeight;
-    const posiciones = [];
-
-    for(let i=0; i<cantidadPatitas; i++) {
-        const paw = document.createElement('img');
+    var container = document.getElementById('paw-container');
+    if (!container) {
+        console.warn('No se encontró el contenedor de patitas (#paw-container)');
+        return;
+    }
+    // Limpiar patitas previas si las hay
+    container.innerHTML = '';
+    var containerWidth = window.innerWidth - sidebarWidth;
+    var containerHeight = window.innerHeight;
+    var posiciones = [];
+    for(var i=0; i<cantidadPatitas; i++) {
+        var paw = document.createElement('img');
         paw.src = 'img/pawBackground.png';
-        paw.classList.add('paw-bg');
-
-        const tamano = tamanoMin + Math.random() * (tamanoMax - tamanoMin);
-        paw.style.width = `${tamano}px`;
-        paw.style.height = `${tamano}px`;
-
-        let x, y, intentos = 0;
+        paw.className = 'paw-bg';
+        var tamano = tamanoMin + Math.random() * (tamanoMax - tamanoMin);
+        paw.style.width = tamano + 'px';
+        paw.style.height = tamano + 'px';
+        var x, y, intentos = 0;
         do {
             x = sidebarWidth + Math.random() * (containerWidth - tamano);
             y = headerHeight + Math.random() * (containerHeight - headerHeight - tamano);
             intentos++;
-        } while(posiciones.some(p => 
-            Math.abs(p.x - x) < (p.size + tamano) && Math.abs(p.y - y) < (p.size + tamano)
-        ) && intentos < 100);
-
-        posiciones.push({x, y, size: tamano});
-        paw.style.left = `${x}px`;
-        paw.style.top = `${y}px`;
-
-        paw.style.animationDuration = `${2 + Math.random()*3}s`;
-
+        } while(posiciones.some(function(p) {
+            return Math.abs(p.x - x) < (p.size + tamano) && Math.abs(p.y - y) < (p.size + tamano);
+        }) && intentos < 100);
+        posiciones.push({x: x, y: y, size: tamano});
+        paw.style.left = x + 'px';
+        paw.style.top = y + 'px';
+        paw.style.animationDuration = (2 + Math.random()*3) + 's';
         container.appendChild(paw);
     }
 }
