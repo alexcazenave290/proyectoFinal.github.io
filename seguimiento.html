@@ -27,27 +27,54 @@
     body{
       background:var(--beige);
       font-family: 'Poppins', system-ui, Arial;
-      color: #4b3b2b;
+      color:#4b3b2b;
       margin:0;
     }
 
     /* Sidebar */
     .sidebar{
-      position: fixed; left:0; top:0; bottom:0; width:220px;
+      position: fixed;
+      left:0; top:0; bottom:0;
+      width:220px;
       background: linear-gradient(180deg,var(--marron) 0%, #b48a5a 100%);
-      color:white; padding:18px 12px; box-shadow: 2px 0 12px rgba(0,0,0,0.12);
+      color:white;
+      padding:18px 12px;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.12);
+      transition: transform 0.3s ease;
+      z-index:1000;
     }
+
     .sidebar .logo{ width:48px; display:block; margin:0 auto 10px;}
     .sidebar nav ul{ list-style:none; padding:0; margin:12px 0 0 0;}
     .sidebar nav a{ color:white; text-decoration:none; display:block; padding:10px 8px; border-radius:8px; margin-bottom:6px; font-weight:600;}
     .sidebar nav a:hover{ background: rgba(255,255,255,0.08); }
 
-    .main-content{ margin-left:240px; padding:28px; min-height:100vh; }
+    /* Toggle button */
+    #menu-toggle {
+      display:none;
+      font-size:1.8rem;
+      cursor:pointer;
+      position:fixed;
+      top:12px; left:12px;
+      z-index:1100;
+      color:var(--marron-dark);
+    }
 
-    .card-form{ background:var(--beige-card); border-radius:12px; padding:18px; box-shadow: 0 6px 18px rgba(0,0,0,0.04); }
+    .main-content{
+      margin-left:240px;
+      padding:28px;
+      min-height:100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    .card-form{
+      background:var(--beige-card);
+      border-radius:12px;
+      padding:18px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+    }
 
     .section-title{
-      font-family: 'Poppins', system-ui, Arial;
       font-weight:700; 
       font-size:1.3rem; 
       color:#2d2d2d; 
@@ -58,7 +85,6 @@
     }
 
     label.form-label{
-      font-family: 'Poppins', system-ui, Arial;
       font-weight:600;
     }
 
@@ -71,11 +97,9 @@
       color:white;
       background: var(--accent);
     }
-    .btn:hover{
-      background: #9b7447;
-    }
+    .btn:hover{ background: #9b7447; }
 
-    /* --- Animación deslizante --- */
+    /* Animación */
     #seccion-seguimiento {
       opacity: 0;
       transform: translateY(40px);
@@ -88,9 +112,21 @@
       visibility: visible;
     }
 
+    /* Responsive */
+    @media(max-width:768px){
+      .sidebar { transform: translateX(-100%); position:fixed; }
+      .sidebar.active { transform: translateX(0); }
+      #menu-toggle { display:block; }
+      .main-content { margin-left:0; padding:20px; }
+    }
   </style>
 </head>
+
 <body>
+
+  <!-- Botón menú móvil -->
+  <i id="menu-toggle" class='bx bx-menu'></i>
+
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <img src="./img/logoUpon.png" alt="Logo" class="logo">
@@ -114,7 +150,6 @@
         <div class="col-lg-4" id="seccion-datos">
           <div class="card-form">
             <h3 class="section-title">Datos Generales</h3>
-
             <form id="formDatos">
               <div class="mb-2">
                 <label class="form-label">Seleccionar mascota</label>
@@ -122,22 +157,18 @@
                   <option value="">Sin mascotas</option>
                 </select>
               </div>
-
               <div class="mb-2">
                 <label class="form-label">Nombre adoptante</label>
                 <input id="adoptante" class="form-control" placeholder="Nombre del adoptante">
               </div>
-
               <div class="mb-2">
                 <label class="form-label">Teléfono</label>
                 <input id="telefono" class="form-control" placeholder="099 123 456">
               </div>
-
               <div class="mb-2">
                 <label class="form-label">Email</label>
                 <input id="email" type="email" class="form-control" placeholder="mail@ejemplo.com">
               </div>
-
               <div class="d-grid gap-2 mt-2">
                 <button class="btn" id="guardarDatosBtn">Guardar datos</button>
               </div>
@@ -165,22 +196,18 @@
                   <input id="fechaSeguimiento" type="date" class="form-control">
                 </div>
               </div>
-
               <div class="mb-2 mt-2">
                 <label class="form-label">Comportamiento</label>
                 <textarea id="comportamiento" class="form-control" rows="3" placeholder="Observaciones del comportamiento..."></textarea>
               </div>
-
               <div class="mb-2">
                 <label class="form-label">Observaciones</label>
                 <textarea id="observaciones" class="form-control" rows="2"></textarea>
               </div>
-
               <div class="mb-3">
                 <label class="form-label">Foto (opcional)</label>
                 <input type="file" name="foto_mascota" class="form-control" accept="image/*">
               </div>
-
               <div class="d-flex gap-2">
                 <button class="btn" id="guardarSeguimientoBtn">Guardar seguimiento</button>
                 <button type="button" id="resetSeguimiento" class="btn btn-outline-secondary">Limpiar</button>
@@ -211,17 +238,20 @@
   <script>
     const formDatos = document.getElementById("formDatos");
     const seccionSeguimiento = document.getElementById("seccion-seguimiento");
+    const menuToggle = document.getElementById("menu-toggle");
+    const sidebar = document.querySelector(".sidebar");
+
+    // Menú responsive
+    menuToggle.addEventListener("click", ()=> sidebar.classList.toggle("active"));
 
     formDatos.addEventListener("submit", function(e){
       e.preventDefault();
       const adoptante = document.getElementById("adoptante").value.trim();
       const telefono = document.getElementById("telefono").value.trim();
       const email = document.getElementById("email").value.trim();
-
       if(adoptante && telefono && email){
-        // Activa animación de aparición
         seccionSeguimiento.classList.add("activo");
-        seccionSeguimiento.scrollIntoView({ behavior: "smooth" });
+        seccionSeguimiento.scrollIntoView({ behavior:"smooth" });
       } else {
         alert("Por favor, completa todos los campos antes de continuar.");
       }
