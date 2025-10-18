@@ -1,0 +1,223 @@
+[Donaciones.html](https://github.com/user-attachments/files/22986928/Donaciones.html)
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Donaciones - Casa Patitas</title>
+
+<!-- Boxicons -->
+<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
+<style>
+  :root{
+    --marron:#8b6f47;
+    --beige:#f4ede4;
+    --beige-card:#fff9f3;
+    --accent:#b29366;
+    --muted:#5a4326;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Poppins', system-ui, Arial;
+    background: var(--beige);
+    color: #4b3b2b;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    position: fixed;
+    top:0; left:0; bottom:0;
+    width:220px;
+    background: linear-gradient(180deg,var(--marron) 0%, #b48a5a 100%);
+    color:white;
+    padding:18px 12px;
+    box-shadow: 2px 0 12px rgba(0,0,0,0.12);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+  }
+
+  .sidebar .logo { width:48px; display:block; margin:0 auto 10px; }
+
+  .sidebar nav ul { list-style:none; margin-top:12px; }
+  .sidebar nav a {
+    color:white; text-decoration:none; display:block; padding:10px 8px;
+    border-radius:8px; margin-bottom:6px; font-weight:600;
+  }
+  .sidebar nav a:hover { background: rgba(255,255,255,0.08); }
+
+  /* Responsive menu toggle */
+  #menu-toggle { display:none; font-size:1.8rem; cursor:pointer; position:fixed; top:12px; left:12px; z-index:1100; color: var(--marron-dark); }
+
+  /* Main content */
+  .main-content {
+    margin-left:220px;
+    padding:28px;
+    transition: margin-left 0.3s ease;
+  }
+
+  /* Donaciones Card */
+  .donaciones-card {
+    background: var(--beige-card);
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  h1 { text-align:center; margin-bottom:15px; }
+  p { text-align:center; margin-bottom:15px; }
+
+  input[type="text"], input[type="email"] {
+    width:100%; padding:10px; margin-top:8px; border:1px solid #ccc; border-radius:5px;
+  }
+
+  label { display:block; margin:10px 0; cursor:pointer; }
+
+  .btn-pago {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    margin: 15px auto;
+    padding: 12px;
+    font-weight: bold;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align:center;
+    text-decoration:none;
+    transition: background 0.3s ease;
+  }
+
+  .btn-mercadopago { background: #009EE3; }
+  .btn-mercadopago:hover { background: #007bbd; }
+
+  .btn-paypal { background: #003087; }
+  .btn-paypal:hover { background: #001f50; }
+
+  /* Tooltip */
+  .tooltip { position: relative; display: inline-block; width: 100%; }
+  .tooltip .tooltiptext {
+    visibility: hidden;
+    width: 280px;
+    background-color: #333;
+    color: #fff;
+    text-align:center;
+    border-radius:6px;
+    padding:6px;
+    position:absolute;
+    z-index:10;
+    bottom:125%;
+    left:50%;
+    transform:translateX(-50%);
+    opacity:0;
+    transition: opacity 0.3s;
+    font-size:0.85rem;
+  }
+  .tooltip .tooltiptext::after {
+    content:"";
+    position:absolute;
+    top:100%;
+    left:50%;
+    margin-left:-5px;
+    border-width:5px;
+    border-style:solid;
+    border-color:#333 transparent transparent transparent;
+  }
+  .tooltip input:disabled:hover + .tooltiptext {
+    visibility: visible; opacity:1;
+  }
+
+  /* Responsive */
+  @media(max-width:768px){
+    .sidebar { transform: translateX(-100%); position:fixed; }
+    .sidebar.active { transform: translateX(0); }
+    #menu-toggle { display:block; }
+    .main-content { margin-left:0; padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Menu toggle para móvil -->
+<i id="menu-toggle" class='bx bx-menu'></i>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <img src="./img/logoUpon.png" alt="Logo" class="logo">
+  <nav>
+    <ul>
+      <li><a href="index.php">Inicio</a></li>
+      <li><a href="PestañaDonaciones.html" style="background: rgba(255,255,255,0.2); border-radius:8px;">Donaciones</a></li>
+      <li><a href="SobreNosotros.html">Sobre Nosotros</a></li>
+      <li><a href="Asociaciones.html">Asociaciones</a></li>
+      <li><a href="RecursosLegales.html">Recursos Legales</a></li>
+      <li><a href="guardados.html">Guardados</a></li>
+    </ul>
+  </nav>
+</aside>
+
+<!-- Contenido principal -->
+<div class="main-content">
+  <div class="donaciones-card">
+    <h1>Donaciones</h1>
+    <p>Selecciona las opciones que deseas apoyar:</p>
+
+    <label><input type="checkbox" id="general"> Donación al proyecto en general</label>
+    <label><input type="checkbox" id="refugio"> Donación a un refugio en específico</label>
+
+    <div class="tooltip">
+      <input type="text" id="input" placeholder="Refugio" disabled>
+      <span class="tooltiptext">Debes elegir "Donación a un refugio en específico" para escribir aquí</span>
+    </div>
+
+    <p>Elige la plataforma de pago:</p>
+    <button class="btn-pago btn-mercadopago" id="mercadoBtn">Pagar con Mercado Pago</button>
+    <button class="btn-pago btn-paypal" id="paypalBtn">Pagar con PayPal</button>
+  </div>
+</div>
+
+<script>
+  const general = document.getElementById("general");
+  const refugio = document.getElementById("refugio");
+  const input = document.getElementById("input");
+  const menuToggle = document.getElementById("menu-toggle");
+  const sidebar = document.querySelector(".sidebar");
+  const mercadoBtn = document.getElementById("mercadoBtn");
+  const paypalBtn = document.getElementById("paypalBtn");
+
+  // Toggle sidebar mobile
+  menuToggle.addEventListener("click", ()=>{ sidebar.classList.toggle("active"); });
+
+  // Donación checkbox
+  function handleCheck(e){
+    if(e.target===general && general.checked){ refugio.checked=false; input.disabled=true; }
+    if(e.target===refugio && refugio.checked){ general.checked=false; input.disabled=false; }
+  }
+  general.addEventListener("change", handleCheck);
+  refugio.addEventListener("change", handleCheck);
+
+  // Validación y simulación pago
+  function validarDonacion(plataforma){
+    if(!general.checked && !refugio.checked){
+      alert("Por favor selecciona una opción de donación.");
+      return;
+    }
+    if(refugio.checked && input.value.trim()===""){
+      alert("Por favor escribe el nombre del refugio.");
+      return;
+    }
+    alert(`¡Redirigiendo a ${plataforma} para completar tu donación!`);
+    // Aquí podrías agregar la integración real con Mercado Pago o PayPal
+  }
+
+  mercadoBtn.addEventListener("click", ()=> validarDonacion("Mercado Pago"));
+  paypalBtn.addEventListener("click", ()=> validarDonacion("PayPal"));
+</script>
+
+</body>
+</html>
