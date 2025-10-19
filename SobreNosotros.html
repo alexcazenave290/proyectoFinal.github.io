@@ -1,145 +1,155 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>¿Quiénes Somos? - Upon</title>
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Página Base</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap" rel="stylesheet">
-    
-    <style>
-        .about-us-container {
-            max-width: 850px;
-            margin: 80px auto;
-            padding: 40px 50px;
-            background: #fffbe6;
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-            position: relative;
-            z-index: 2;
-        }
+<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap" rel="stylesheet">
 
-        .about-us-container:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 12px 36px rgba(0,0,0,0.2);
-        }
+<style>
+:root {
+    --beige: #fffbe6;
+    --marron: #b48a5a;
+    --marron-dark: #5a4326;
+}
 
-        .about-us-container h1 {
-            text-align: center;
-            font-size: 2.5rem;
-            color: #5a4326;
-            margin-bottom: 16px;
-            font-weight: 700;
-        }
+/* Reset y body */
+body {
+    margin: 0;
+    font-family: 'Roboto Flex', system-ui, Arial;
+    background: var(--beige);
+}
 
-        .about-us-container h2 {
-            font-size: 1.6rem;
-            color: #b48a5a;
-            margin-bottom: 10px;
-            border-bottom: 2px solid #b48a5a44;
-            display: inline-block;
-            padding-bottom: 4px;
-        }
+/* Sidebar */
+.sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 220px;
+    background: linear-gradient(180deg,var(--marron) 0%, #b48a5a 100%);
+    padding: 18px 12px;
+    box-shadow: 2px 0 12px rgba(0,0,0,0.12);
+    color: white;
+    transition: transform 0.3s ease;
+    z-index: 1000;
+}
 
-        .about-us-container p {
-            font-size: 1.1rem;
-            color: #333;
-            line-height: 1.7;
-        }
+.sidebar nav ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
 
-        .about-us-container ul {
-            list-style: disc;
-            padding-left: 20px;
-            color: #333;
-            font-size: 1.1rem;
-        }
+.sidebar nav a {
+    display: block;
+    text-decoration: none;
+    color: white;
+    padding: 10px 8px;
+    margin-bottom: 6px;
+    border-radius: 8px;
+    font-weight: 600;
+}
 
-        .about-us-container ul li {
-            margin-bottom: 10px;
-        }
+.sidebar nav a:hover {
+    background: rgba(255,255,255,0.08);
+}
 
-        .cta-link {
-            display: inline-block;
-            width: fit-content;
-            margin: 30px auto 0;
-            padding: 14px 28px;
-            background: #b48a5a;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 10px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-        }
+/* Botón hamburguesa */
+#menu-toggle {
+    display: none;
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    font-size: 2rem;
+    color: var(--marron-dark);
+    z-index: 1101;
+    cursor: pointer;
+}
 
-        .cta-link:hover {
-            background: #99734e;
-            transform: scale(1.05);
-        }
+.main-content {
+    margin-left: 220px;
+    padding: 28px;
+    position: relative;
+    z-index: 2; /* encima de las patitas */
+    min-height: 100vh;
+}
 
-        /* Fondo animado de patitas */
-        .paw-bg {
-            position: absolute;
-            width: 56px;
-            height: 56px;
-            opacity: 0.3;
-            z-index: 1;
-            pointer-events: none;
-            transition: transform 0.8s cubic-bezier(.4,2,.6,1);
-        }
+/* Fondo animado de patitas */
+#paw-container {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
 
-        /* Responsivo */
-        @media (max-width: 768px) {
-            .about-us-container {
-                margin: 60px 20px;
-                padding: 30px 25px;
-            }
+.paw-bg {
+    position: absolute;
+    width: 8vw;  /* ancho relativo a pantalla */
+    height: auto;
+    max-width: 56px;
+    opacity: 0.3;
+    pointer-events: none;
+    transition: transform 0.8s cubic-bezier(.4,2,.6,1);
+}
 
-            .about-us-container h1 {
-                font-size: 2rem;
-            }
+/* Contenedores de contenido */
+.container {
+    max-width: 900px;
+    margin: 60px auto;
+    background: #fffbe6;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
 
-            .about-us-container h2 {
-                font-size: 1.4rem;
-            }
-
-            .cta-link {
-                padding: 12px 24px;
-                font-size: 1rem;
-            }
-        }
-    </style>
+/* Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    #menu-toggle {
+        display: block;
+    }
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+    }
+}
+</style>
 </head>
 <body>
-    <div class="container-main">
-        <aside class="sidebar">
-            <div class="logo-menu">
-                <img src="./img/logoUpon.png" alt="Logo" class="logo">
-                <span class="menu-icon">&#9776;</span>
-            </div>
-            <nav>
-                <ul>
-                    <li><a href="index.php">Inicio</a></li>
-                    <li><a href="PestañaDonaciones.html">Donaciones</a></li>
-                    <li><a href="SobreNosotros.html" style="background: #8b4513; border-radius: 8px;">Sobre Nosotros</a></li>
-                    <li><a href="Asociaciones.html">Asociaciones</a></li>
-                    <li><a href="RecursosLegales.html">Recursos Legales</a></li>
-                    <li><a href="guardados.html">Guardados</a></li>
-                </ul>
-            </nav>
-        </aside>
-        <main class="main-content">
-            <!-- Fondo de patitas -->
-            <div id="paw-container"></div>
 
-            <div class="about-us-container">
-                <h1>¿Quiénes somos?</h1>
+<!-- Botón hamburguesa -->
+<i id="menu-toggle" class='bx bx-menu'></i>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+    <img src="./img/logoUpon.png" alt="Logo" class="logo" style="width:48px; display:block; margin:0 auto 10px;">
+    <nav>
+        <ul>
+            <li><a href="index.php">Inicio</a></li>
+            <li><a href="PestañaDonaciones.html">Donaciones</a></li>
+            <li><a href="SobreNosotros.html">Sobre Nosotros</a></li>
+            <li><a href="Asociaciones.html">Asociaciones</a></li>
+            <li><a href="RecursosLegales.html" style="background: #8b4513; border-radius: 8px;">Recursos Legales</a></li>
+            <li><a href="guardados.html">Guardados</a></li>
+        </ul>
+    </nav>
+</aside>
+
+<!-- Contenido principal -->
+<main class="main-content">
+    <div id="paw-container"></div>
+
+    <div class="container">
+ <h1>¿Quiénes somos?</h1>
                 <h2>Nuestra Misión</h2>
                 <p>En Casa Patitas, nuestra misión es conectar a mascotas necesitadas con hogares amorosos y responsables. Creemos que cada animal merece una segunda oportunidad para encontrar la felicidad.</p>
 
@@ -152,80 +162,78 @@
                     <li><strong>Responsabilidad:</strong> Fomentamos la adopción consciente y educamos a los futuros dueños.</li>
                     <li><strong>Comunidad:</strong> Trabajamos de la mano con refugios locales y asociaciones para maximizar nuestro impacto.</li>
                 </ul>
-
-                <a href="index.php" class="cta-link">Explora nuestras mascotas en adopción</a>
-            </div>
-        </main>
+                  <a href="index.php" class="cta-link">Explora nuestras mascotas en adopción</a>
     </div>
+</main>
 
-    <script>
-    // ===== Configuración fácil =====
-    const cantidadPatitas = 15; // cuántas patitas generar
-    const tiempoMin = 500;      // tiempo mínimo para rotación en ms
-    const tiempoMax = 1200;     // tiempo máximo para rotación en ms
-    const tamanoMin = 30;       // tamaño mínimo en px
-    const tamanoMax = 70;       // tamaño máximo en px
-    // ================================
+<script>
+// ===== Sidebar hamburguesa =====
+const menuToggle = document.getElementById("menu-toggle");
+const sidebar = document.querySelector(".sidebar");
+menuToggle.addEventListener("click", () => {
+    sidebar.classList.toggle("active");
+});
 
-    document.addEventListener('DOMContentLoaded', function() {
-        generarPatitas();
-    });
+// ===== Animación de patitas =====
+const cantidadPatitas = 15;
+const tiempoMin = 500;
+const tiempoMax = 1200;
+const tamanoMin = 30;
+const tamanoMax = 70;
 
-    function generarPatitas() {
-        const container = document.getElementById('paw-container');
-        const containerWidth = window.innerWidth;
-        const containerHeight = window.innerHeight;
+document.addEventListener('DOMContentLoaded', generarPatitas);
 
-        const posiciones = [];
+function generarPatitas() {
+    const container = document.getElementById('paw-container');
+    const containerWidth = container.offsetWidth;
+    const containerHeight = container.offsetHeight;
 
-        for(let i=0; i<cantidadPatitas; i++) {
-            const paw = document.createElement('img');
-            paw.src = 'img/pawBackground.png';
-            paw.classList.add('paw-bg');
+    const posiciones = [];
 
-            // Tamaño aleatorio
-            const tamano = tamanoMin + Math.random() * (tamanoMax - tamanoMin);
-            paw.style.width = `${tamano}px`;
-            paw.style.height = `${tamano}px`;
+    for(let i=0; i<cantidadPatitas; i++) {
+        const paw = document.createElement('img');
+        paw.src = 'img/pawBackground.png';
+        paw.classList.add('paw-bg');
 
-            // Posición aleatoria sin solapamiento
-            let x, y, intentos = 0;
-            do {
-                x = Math.random() * (containerWidth - tamano);
-                y = Math.random() * (containerHeight - tamano);
-                intentos++;
-            } while(posiciones.some(p => 
-                Math.abs(p.x - x) < (p.size + tamano) && Math.abs(p.y - y) < (p.size + tamano)
-            ) && intentos < 100);
+        const tamano = tamanoMin + Math.random()*(tamanoMax-tamanoMin);
+        paw.style.width = `${tamano}px`;
+        paw.style.height = 'auto';
 
-            posiciones.push({x, y, size: tamano});
-            paw.style.left = `${x}px`;
-            paw.style.top = `${y}px`;
+        let x, y, intentos = 0;
+        do {
+            x = Math.random()*(containerWidth-tamano);
+            y = Math.random()*(containerHeight-tamano);
+            intentos++;
+        } while(posiciones.some(p => Math.abs(p.x-x)<(p.size+tamano) && Math.abs(p.y-y)<(p.size+tamano)) && intentos<100);
 
-            container.appendChild(paw);
+        posiciones.push({x, y, size: tamano});
+        paw.style.left = `${x}px`;
+        paw.style.top = `${y}px`;
 
-            animarPatita(paw);
-        }
+        container.appendChild(paw);
+        animarPatita(paw);
     }
+}
 
-    function animarPatita(paw) {
-        const randomDeg = Math.floor(Math.random() * 91) - 45;
-        paw.style.transform = `rotate(${randomDeg}deg)`;
+function animarPatita(paw) {
+    const randomDeg = Math.floor(Math.random()*91)-45;
+    paw.style.transform = `rotate(${randomDeg}deg)`;
+    const nextTime = tiempoMin + Math.random()*(tiempoMax-tiempoMin);
+    setTimeout(()=>animarPatita(paw), nextTime);
+}
 
-        const nextTime = tiempoMin + Math.random() * (tiempoMax - tiempoMin);
-        setTimeout(() => animarPatita(paw), nextTime);
-    }
+window.addEventListener('resize', () => {
+    const paws = document.querySelectorAll('.paw-bg');
+    const container = document.getElementById('paw-container');
+    const containerWidth = container.offsetWidth;
+    const containerHeight = container.offsetHeight;
 
-    window.addEventListener('resize', () => {
-        const paws = document.querySelectorAll('.paw-bg');
-        const containerWidth = window.innerWidth;
-        const containerHeight = window.innerHeight;
-        paws.forEach(paw => {
-            const tamano = paw.offsetWidth;
-            paw.style.left = Math.random() * (containerWidth - tamano) + 'px';
-            paw.style.top = Math.random() * (containerHeight - tamano) + 'px';
-        });
+    paws.forEach(paw => {
+        const tamano = paw.offsetWidth;
+        paw.style.left = Math.random()*(containerWidth-tamano)+'px';
+        paw.style.top = Math.random()*(containerHeight-tamano)+'px';
     });
+});
 </script>
 
 </body>
